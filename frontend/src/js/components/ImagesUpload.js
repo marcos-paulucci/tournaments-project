@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactLoading from 'react-loading';
 
 
-class FileUpload extends Component {
+class ImagesUpload extends Component {
 
     constructor(props) {
         super(props);
@@ -57,4 +57,4 @@ class FileUpload extends Component {
     }
 }
 
-export default FileUpload
+export default ImagesUpload

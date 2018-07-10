@@ -8,6 +8,7 @@ let multer = require('multer');
 let upload = multer();
 var path = require('path');
 var fs = require('fs');
+const imagesPath = 'public/uploads/';
 
 
 var pusher = new Pusher({
@@ -52,12 +53,12 @@ router.post('/new', function (req, res) {
 
 router.post('/upload', upload.array('photos',16), (req, res, next) => {
 
-    debugger;
     var files = req.files;
     for (var i = 0; i < files.length; i++){
-        debugger;
         var file = files[i];
-        var target_path = 'public/uploads/' + file.originalname;
+        var nameLastDot = file.originalname.lastIndexOf("."),
+            nameWithJpgName =  file.originalname.substring(0, nameLastDot);
+        var target_path = imagesPath + nameWithJpgName + ".jpg";
         fs.writeFile(target_path, file.buffer);
     }
     res.status(200).send('subido exitosamente!');
@@ -100,7 +101,6 @@ router.route('/playersNames')
     .post((req, res) => {
 
         Player.remove({}, function(){});
-        debugger;
         req.body.forEach(function(p){
             Player.create({
                 name: p.name
@@ -111,14 +111,12 @@ router.route('/playersNames')
                 }
             });
         });
-        res.status(200);
+        res.status(200).send('Ok');
     })
 
     .get((req, res) => {
-        debugger;
         Player.find({}, function(err, ps) {
             var players = [];
-            debugger;
             ps.forEach(function(p) {
                 players.push(p);
             });

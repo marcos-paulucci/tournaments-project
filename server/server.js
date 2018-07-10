@@ -3,8 +3,8 @@ var ejs = require('ejs');
 var bodyParser = require('body-parser');
 var path = require('path');
 var mongoose = require('mongoose');
-var index = require('./serverRoutes/index');
-var api = require('./serverRoutes/api');
+var index = require('./src/index');
+var api = require('./src/api');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
 var httpProxy = require('http-proxy');
@@ -37,7 +37,7 @@ app.use('/api', api);
 
 app.use(fileUpload());
 
-mongoose.connect('mongodb://localhost/temperatures');
+mongoose.connect('mongodb://localhost/tournament');
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection Error:'));
