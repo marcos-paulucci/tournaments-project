@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
 import Pusher from 'pusher-js'
-import {PUSHER_APP_KEY, baseImagesUri, baseApiUrl, puntosPorBatalla} from '../../config/properties'
+import {PUSHER_APP_KEY, baseImagesUri, baseApiUrl, puntosPorBatalla} from '../../config/frontendConfig'
 import axios from 'axios';
 import PlayersService from '../services/PlayersService';
 import Background from '../../images/fondoDoup2.jpg';

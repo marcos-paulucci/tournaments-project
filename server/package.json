@@ -1,0 +1,28 @@
+{
+  "name": "doup-tournament",
+  "version": "1.0.0",
+  "description": "Doup server project.",
+  "main": "server.js",
+  "keywords": [],
+  "author": "Marcos Paulucci",
+  "license": "",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.4",
+    "ejs": "^2.5.2",
+    "express": "^4.16.3",
+    "express-fileupload": "^0.4.0",
+    "http-proxy": "^1.17.0",
+    "mongoose": "^4.6.4",
+    "multer": "^1.3.0",
+    "path": "^0.12.7",
+    "pusher-js": "^4.2.2",
+    "redbird": "^0.7.0"
+  },
+  "devDependencies": {
+    "api-book": "^0.2.4",
+    "expect": "^1.20.2",
+    "gh-pages": "^1.0.0",
+    "pusher": "^1.5.1"
+  }
+}

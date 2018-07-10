@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
 import Pusher from 'pusher-js'
-import {PUSHER_APP_KEY, baseImagesUri, juries} from '../../config/properties'
+import {PUSHER_APP_KEY, baseImagesUri, juries} from '../../config/frontendConfig';
 import PlayersService from '../services/PlayersService';
 import Background from '../../images/fondoDoup2.jpg';
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";

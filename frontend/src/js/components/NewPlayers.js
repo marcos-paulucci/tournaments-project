@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import {baseApiUrl} from "../../config/properties";
+import {baseApiUrl} from '../../config/frontendConfig';
 import FlexView from 'react-flexview';
 
 class NewPlayers extends Component {
