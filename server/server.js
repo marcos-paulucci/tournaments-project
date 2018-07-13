@@ -20,10 +20,13 @@ app.all('*', function(req, res, next) {
     next();
 });
 
-// app.all("http://localhost:3001/api/*", function(req, res) {
-//     console.log('redirecting to Server1');
-//     apiProxy.web(req, res, {target: "http://localhost:3000"});
-// });
+//loki in memory db for quick battle status responses
+var loki = require('lokijs');
+var lokiDb = new loki('lokiInMemoryDb.db');
+var currentBattlesInMemo = lokiDb.getCollection('currentBattles');
+if(!currentBattlesInMemo){
+    currentBattlesInMemo = lokiDb.addCollection('currentBattles');
+}
 
 
 app.use(express.static('public'));
@@ -46,3 +49,5 @@ db.once('open', function () {
     console.log('Node server running on port 3000');
   });
 });
+
+

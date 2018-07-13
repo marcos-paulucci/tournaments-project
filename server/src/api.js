@@ -2,6 +2,8 @@ var Pusher = require('pusher');
 var Scoring  = require('./models/scoring');
 var Battle  = require('./models/battle');
 var Player  = require('./models/player');
+var Jury  = require('./models/jury');
+var Fixture  = require('./models/fixture');
 var express = require('express');
 var router = express.Router();
 let multer = require('multer');
@@ -9,6 +11,8 @@ let upload = multer();
 var path = require('path');
 var fs = require('fs');
 const imagesPath = 'public/uploads/';
+const battleService = require('./services/battleService');
+const fixtureService = require('./services/fixtureService');
 
 
 var pusher = new Pusher({
@@ -122,6 +126,45 @@ router.route('/playersNames')
             });
 
             res.send(players);
+        });
+    });
+
+router.route('/juriesNames')
+    .post((req, res) => {
+
+        req.body.forEach(function(j){
+            Jury.create({
+                name: j.name
+            }, function (err, player) {
+                if (err) {
+                    console.log('CREATE Error: ' + err);
+                    res.status(500).send('Error');
+                }
+            });
+        });
+        res.status(200).send('Ok');
+    })
+
+    .get((req, res) => {
+        Jury.find({}, function(err, js) {
+            var juries = [];
+            js.forEach(function(j) {
+                juries.push(j);
+            });
+
+            res.send(juries);
+        });
+    });
+
+router.route('/fixture')
+    .post(async (req, res) => {
+        await fixtureService.createFixture({callback: function(){}}, "breaking");
+        res.status(200).send('Ok');
+    })
+
+    .get((req, res) => {
+        Fixture.findOne({}, {}, { sort: { 'created_at' : -1 } }, function(err, fx) {
+            res.send(fx);
         });
     });
 

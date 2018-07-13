@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import ReactLoading from 'react-loading';
 import axios from "axios/index";
 import PlayersService from "../services/PlayersService";
+import { ToastContainer, toast } from 'react-toastify';
+import {baseImagesUri} from "../../config/frontendConfig";
+const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 
 
 class Players extends Component {
@@ -48,8 +51,6 @@ class Players extends Component {
         }
         try {
             const response = await axios.post('http://localhost:3000/api/upload', data);
-            debugger;
-            let a = response;
         } catch (err){
             console.log(err);
         }
@@ -66,8 +67,8 @@ class Players extends Component {
         });
         try {
             await this.subirPlayersNames();
-            debugger;
             await this.subirFotos(files);
+            toast("Competidores subidos exitosamente!");
         } catch (err){
             console.log(err);
         } finally {
@@ -120,9 +121,19 @@ class Players extends Component {
         });
     }
 
+    fixPlayerBrokenImgSrc(target) {
+        target.target.src = playerDefaultImg;
+    }
+
+    powerOfTwo(x) {
+        return (Math.log(x)/Math.log(2)) % 1 === 0;
+    }
+
+
 
     render() {
         let self = this;
+        let isPowerOfTwo = this.powerOfTwo(this.state.players.length);
         return(
             this.state.uploading ?
             <div style={{height: '100%', width: '100%', textAlign: 'center'}}>
@@ -146,11 +157,13 @@ class Players extends Component {
                     <div className="playersAddList">
                         {this.state.players.map(function(player, index){
                             return <li className="playerLi" key={ index }>
-                                    <input className="playerName" id={"playerName" + index}  type="text" name="playerName" value={player.name} onChange={self.playerNameChanged.bind(self)}/>
-                                    </li>;
+                                <span>Player # {index}</span>
+                                <input className="playerName" id={"playerName" + index}  type="text" name="playerName" value={player.name} onChange={self.playerNameChanged.bind(self)}/>
+                                <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
+                            </li>;
                         })}
                     </div>
-                    <input type="submit" value="Subir competidores!" />
+                    {isPowerOfTwo ? <input type="submit" value="Subir competidores!" /> : <span>Aun no puedes subir los competidores, deben ser potencia de 2</span>}
                 </div>
             </form>
         )

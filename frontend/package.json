@@ -28,6 +28,7 @@
     "react-responsive": "^4.0.3",
     "react-router-dom": "^4.2.2",
     "react-spinkit": "^3.0.0",
+    "react-toastify": "^4.1.0",
     "redbird": "^0.7.0",
     "redux-async-await": "^1.0.1"
   },
