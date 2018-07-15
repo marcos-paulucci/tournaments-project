@@ -1,5 +1,3 @@
-var Pusher = require('pusher');
-var Scoring  = require('./models/scoring');
 var Battle  = require('./models/battle');
 var Player  = require('./models/player');
 var Jury  = require('./models/jury');
@@ -13,47 +11,21 @@ var fs = require('fs');
 const imagesPath = 'public/uploads/';
 const battleService = require('./services/battleService');
 const fixtureService = require('./services/fixtureService');
+const juryService = require('./services/juryService');
 
-
-var pusher = new Pusher({
-  appId      : process.env.PUSHER_APP_ID,
-  key        : process.env.PUSHER_APP_KEY,
-  secret     : process.env.PUSHER_APP_SECRET,
-    encrypted  : true,
-    cluster: 'us2'
-});
-var channel = 'battle_points';
-
-/* CREATE */
-router.post('/new', function (req, res) {
-    Scoring.create({
-        author: req.body.author,
-        scorePlayer1: req.body.p1,
-        scorePlayer2: req.body.p2
-  }, function (err, scoring) {
-    if (err) {
-      console.log('CREATE Error: ' + err);
-        res.status(500).send('Error');
-    } else {
-      pusher.trigger(
-        channel,
-        'newPoints',
-        {
-          name: 'newPoints',
-          id: scoring._id,
-            author: scoring.author,
-            p1: scoring.scorePlayer1,
-            p2: scoring.scorePlayer2,
-        },
-          function (err, req, respo){
-            console.log(err);
-          }
-      );
-
-      res.status(200).json(scoring);
-    }
-  });
-});
+router.route('/currentBattlePoints')
+    .post( (req, res) => {
+        battleService.updateInmemoActiveBattlePoints(req.body.battleId, {
+            name: req.body.juryName,
+            p1: req.body.p1,
+            p2: req.body.p2
+        });
+    })
+    .get(async (req, res) => {
+        await battleService.getInmemoActiveBattleById(function(bt){
+            res.status(200).json(bt);
+        }, req.query.id);
+    });
 
 router.post('/upload', upload.array('photos',16), (req, res, next) => {
 
@@ -70,41 +42,29 @@ router.post('/upload', upload.array('photos',16), (req, res, next) => {
 });
 
 
-router.route('/battlePlayers')
-.post((req, res) => {
 
-    Battle.remove({}, function(){});
 
-    Battle.create({
-        player1: req.body.p1,
-        player2: req.body.p2
-    }, function (err, battle) {
-        if (err) {
-            console.log('CREATE Error: ' + err);
-            res.status(500).send('Error');
-        } else {
-            res.status(200).json(battle);
-        }
-    });
+router.route('/currentBattle')
+.post(async (req, res) => {
+    await battleService.setCurrentBattle(function(){
+        res.status(200).send('current battle set succesfully!');
+    }, req.body.battleId);
 })
 
-.get((req, res) => {
-    Battle.findOne({}, {}, { sort: { 'created_at' : -1 } }, function(err, battle) {
-        if (err) {
-            console.log('PUT Error: ' + err);
-            res.status(500).send('Error');
-        } else if (battle) {
-            res.status(200).json(battle);
-        } else {
-            res.status(404).send('Not found');
-        }
+.get(async (req, res) => {
+    await battleService.getCurrentBattle(function(bt){
+        res.status(200).json(bt);
     });
 });
+
+
+
+
 
 router.route('/playersNames')
     .post((req, res) => {
 
-        Player.remove({}, function(){});
+
         req.body.forEach(function(p){
             Player.create({
                 name: p.name
@@ -126,6 +86,11 @@ router.route('/playersNames')
             });
 
             res.send(players);
+        });
+    })
+    .delete(async (req, res) => {
+        Player.remove({}, function(){
+            res.status(200).send('Deleted');
         });
     });
 
@@ -154,6 +119,26 @@ router.route('/juriesNames')
 
             res.send(juries);
         });
+    })
+    .delete(async (req, res) => {
+        await juryService.deleteAllJuries(function(){
+            res.status(200).send('Deleted');
+        });
+    })
+;
+
+router.route('/checkJuryName')
+
+    .get((req, res) => {
+        Jury.findOne({name: req.query.name}, function(err, jury) {
+            if (err) {
+                console.log('Jury search Error: ' + err);
+            } else if (jury) {
+                res.status(200).send('Jury found!');
+            } else {
+                res.status(404).send('Jury Not found');
+            }
+        });
     });
 
 router.route('/fixture')
@@ -162,74 +147,18 @@ router.route('/fixture')
         res.status(200).send('Ok');
     })
 
-    .get((req, res) => {
-        Fixture.findOne({}, {}, { sort: { 'created_at' : -1 } }, function(err, fx) {
-            res.send(fx);
-        });
-    });
+    .get(async (req, res) => {
+        await fixtureService.getFixture({callback: function(fx){
+                res.send(fx);
+            }});
+    })
+    .delete(async (req, res) => {
+        await fixtureService.removeFixture(function(){
+                res.status(200).send('Deleted');
+            }, req.query.id);
+    })
+    ;
 
 
-
-router.route('/:id')
-
-  /* UPDATE */
-  .put((req, res) => {
-    Scoring.findById(req.params.id, function (err, scoring) {
-      if (err) {
-        console.log('PUT Error: ' + err);
-        res.status(500).send('Error');
-      } else if (scoring) {
-        scoring.updatedAt = Date.now();
-        scoring.scoring = req.body.scoring;
-        scoring.unit = req.body.unit;
-
-        scoring.save(function () {
-          pusher.trigger(
-            channel,
-            'updated', 
-            {
-              name: 'updated',
-              id: scoring._id,
-              date: scoring.updatedAt,
-              scoring: scoring.scoring,
-              unit: scoring.unit,
-            }
-          );
-
-          res.status(200).json(scoring);
-        });
-     } else {
-        res.status(404).send('Not found');
-      }
-    });
-  })
-
-  /* DELETE */
-  .delete((req, res) => {
-    Scoring.findById(req.params.id, function (err, scoring) {
-      if (err) { 
-        console.log('DELETE Error: ' + err);
-        res.status(500).send('Error');
-      } else if (scoring) {
-        scoring.remove(function () {
-          pusher.trigger(
-            channel,
-            'deleted', 
-            {
-              name: 'deleted',
-              id: scoring._id,
-              date: scoring.updatedAt ? scoring.updatedAt : scoring.insertedAt,
-              scoring: scoring.scoring,
-              unit: scoring.unit,
-            }
-          );
-
-          res.status(200).json(scoring);
-        });
-     } else {
-        res.status(404).send('Not found');
-      }
-    });
-  });
 
 module.exports = router;

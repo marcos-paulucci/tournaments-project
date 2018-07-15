@@ -12,11 +12,29 @@ class Juries extends Component {
         super(props);
         this.state = {
             uploading: false,
-            juries: [{name: ''}]
+            juries: [{name: ''}],
+            tostifyAlert : false
         };
         this.subirJurados = this.subirJurados.bind(this);
         this.subirFotos = this.subirFotos.bind(this);
         this.validateImagesAndJurys = this.validateImagesAndJurys.bind(this);
+        this.getJuriesFromServer = this.getJuriesFromServer.bind(this);
+
+    }
+
+    photosChanged(){
+        if (this.state.juries.length > 0 && this.state.juries[0].name !== ""){
+            return
+        }
+        this.loadJuriesByPhoto();
+    }
+
+    loadJuriesByPhoto(){
+        let newJuriesNames = [];
+        for (let i = 0; i < this.uploadInput.files.length; i++){
+            newJuriesNames.push({name: this.uploadInput.files[i].name.split(".")[0]});
+        }
+        this.setState({juries: newJuriesNames});
     }
 
     validateImagesAndJurys() {
@@ -54,8 +72,16 @@ class Juries extends Component {
         }
     }
 
+    async eliminarJurados(){
+        await JuryService.deleteAllJuries();
+        //await this.getJuriesFromServer();
+        window.location.reload();
+    }
+
+
     async subirJurados(ev) {
         ev.preventDefault();
+        const self = this;
         var files = this.uploadInput.files;
         if (!this.validateImagesAndJurys())
             return;
@@ -65,7 +91,20 @@ class Juries extends Component {
         try {
             await this.subirJurysNames();
             await this.subirFotos(files);
-            toast("Jurados subidos exitosamente!");
+
+            setTimeout(function(){
+                self.setState({
+                    tostifyAlert : true
+                });
+                toast("Jurados subidos exitosamente!");
+                setTimeout(function(){
+                    toast.dismiss();
+                    self.setState({
+                        tostifyAlert : false
+                    });
+                }, 3000);
+            }, 300);
+
         } catch (err){
             console.log(err);
         } finally {
@@ -100,23 +139,28 @@ class Juries extends Component {
             uploading: true
         });
         try {
-            const response = await axios.post('http://localhost:3000/api/juriesNames', this.state.juries);
-            if (response.status !== 200){
-                console.error("Error subiendo fotos!" + response.message);
+            const response =  await JuryService.postJuriesNames(this.state.juries);
+            if (!response || response.status !== 200){
+                console.error("Error subiendo nombres de jurados!" + response.message);
+            } else {
+
             }
         } catch (err){
             console.log(err);
         }
     }
 
-    async componentDidMount() {
+    async getJuriesFromServer() {
         let juriesResponse = await JuryService.getAllJurys();
-        debugger;
         let serverJurys = juriesResponse.map(function(p){ return {name: p.name};}),
             finalJurys = serverJurys.length > 0 ? serverJurys : [{name: ""}];
         this.setState({
             juries: finalJurys
         });
+    }
+
+    async componentDidMount() {
+        await this.getJuriesFromServer();
     }
 
     fixJuryBrokenImgSrc(target) {
@@ -126,26 +170,27 @@ class Juries extends Component {
 
     render() {
         let self = this;
+        let displayTostify = this.state.tostifyAlert ? "block" : "none";
         return(
-            this.state.uploading ?
+            <div>
+                <ToastContainer style={{display: displayTostify,fontSize: '2em' ,height: '100%', width: '100%', textAlign: 'center', position: 'absolute', paddingTop: '5em', backgroundColor: '#bcd85f'}} />
+                {this.state.uploading ?
             <div style={{height: '100%', width: '100%', textAlign: 'center'}}>
                 <div style={{display: 'inline-block', position: 'relative', top: '25%' }}>
                     <ReactLoading type="spin" color="#fff" height={200} width={200} />
                 </div>
             </div> :
             <form className="juriesUploadContainer" onSubmit={this.subirJurados}>
-                Primero subir las fotos de los jurados. El nombre del archivo debe coincidir con el nombre del competidor.
+                Las fotos de los jurados deben tener el nombre que usaran en la aplicacion!
                 <div className="container">
                     <div>
                         <div className="form-group">
-                            <input ref={(ref) => { this.uploadInput = ref; }} className="form-control"  type="file" name="photos" multiple />
+                            <input ref={(ref) => { this.uploadInput = ref; }} className="form-control"  type="file" name="photos" onChange={self.photosChanged.bind(self)} multiple />
                         </div>
                     </div>
                 </div>
-                Luego subir las nombres de los jurados. Debe coincidir con el nombre que se uso para su archivo de imagen
+
                 <div className="juriesDataContainer">
-                    <button type="button" onClick={this.anadirJurado.bind(this)}>Agregar jurado</button>
-                    {this.state.juries.length > 1 && <button type="button" onClick={this.quitarJurado.bind(this)}>Quitar jurado</button>}
                     <div className="juriesAddList">
                         {this.state.juries.map(function(jury, index){
                             return <li className="juryLi" key={ index }>
@@ -155,8 +200,11 @@ class Juries extends Component {
                         })}
                     </div>
                     <input type="submit" value="Subir jurados!" />
+                    <button type="button"  onClick={this.eliminarJurados.bind(this)} > Eliminar jurados actuales del servidor</button>
                 </div>
-            </form>
+
+            </form>}
+            </div>
         )
     }
 }

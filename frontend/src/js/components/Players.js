@@ -4,6 +4,7 @@ import axios from "axios/index";
 import PlayersService from "../services/PlayersService";
 import { ToastContainer, toast } from 'react-toastify';
 import {baseImagesUri} from "../../config/frontendConfig";
+import JuryService from "../services/JuryService";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 
 
@@ -13,11 +14,28 @@ class Players extends Component {
         super(props);
         this.state = {
             uploading: false,
-            players: [{name: ''}]
+            players: [{name: ''}],
+            tostifyAlert : false
         };
         this.subirJugadores = this.subirJugadores.bind(this);
         this.subirFotos = this.subirFotos.bind(this);
         this.validateImagesAndPlayers = this.validateImagesAndPlayers.bind(this);
+        this.getPlayersFromServer = this.getPlayersFromServer.bind(this);
+
+    }
+
+    photosChanged(){
+        if (this.state.players.length > 0 && this.state.players[0].name !== ""){
+            return
+        }
+        this.loadPlayersByPhoto();
+    }
+    loadPlayersByPhoto(){
+        let newPlayersNames = [];
+        for (let i = 0; i < this.uploadInput.files.length; i++){
+            newPlayersNames.push({name: this.uploadInput.files[i].name.split(".")[0]});
+        }
+        this.setState({players: newPlayersNames});
     }
 
     validateImagesAndPlayers() {
@@ -44,7 +62,6 @@ class Players extends Component {
     }
 
     async subirFotos(files) {
-        debugger;
         const data = new FormData();
         for (let i = 0; i < files.length; i++){
             data.append('photos', files[i]);
@@ -58,7 +75,7 @@ class Players extends Component {
 
     async subirJugadores(ev) {
         ev.preventDefault();
-        debugger;
+        const self = this;
         var files = this.uploadInput.files;
         if (!this.validateImagesAndPlayers())
             return;
@@ -68,7 +85,19 @@ class Players extends Component {
         try {
             await this.subirPlayersNames();
             await this.subirFotos(files);
-            toast("Competidores subidos exitosamente!");
+            setTimeout(function(){
+                self.setState({
+                    tostifyAlert : true
+                });
+                toast("Competidores subidos exitosamente!");
+                setTimeout(function(){
+                    toast.dismiss();
+                    self.setState({
+                        tostifyAlert : false
+                    });
+                }, 3000);
+            }, 300);
+
         } catch (err){
             console.log(err);
         } finally {
@@ -112,13 +141,23 @@ class Players extends Component {
         }
     }
 
-    async componentDidMount() {
+    async getPlayersFromServer() {
         let playersResponse = await PlayersService.getAllPlayers();
         let serverPlayers = playersResponse.map(function(p){ return {name: p.name};}),
             finalPlayers = serverPlayers.length > 0 ? serverPlayers : [{name: ""}];
         this.setState({
             players: finalPlayers
         });
+    }
+
+    async componentDidMount() {
+        await this.getPlayersFromServer();
+    }
+
+    async eliminarCompetidores (){
+        await PlayersService.deleteAllPlayers();
+        //await this.getPlayersFromServer();
+        window.location.reload();
     }
 
     fixPlayerBrokenImgSrc(target) {
@@ -134,26 +173,26 @@ class Players extends Component {
     render() {
         let self = this;
         let isPowerOfTwo = this.powerOfTwo(this.state.players.length);
+        let displayTostify = this.state.tostifyAlert ? "block" : "none";
         return(
-            this.state.uploading ?
+            <div>
+                <ToastContainer style={{display: displayTostify,fontSize: '2em' ,height: '100%', width: '100%', textAlign: 'center', position: 'absolute', paddingTop: '5em', backgroundColor: '#bcd85f'}} />
+                {this.state.uploading ?
             <div style={{height: '100%', width: '100%', textAlign: 'center'}}>
                 <div style={{display: 'inline-block', position: 'relative', top: '25%' }}>
                     <ReactLoading type="spin" color="#fff" height={200} width={200} />
                 </div>
             </div> :
             <form className="playersUploadContainer" onSubmit={this.subirJugadores}>
-                Primero subir las fotos de los competidores. El nombre del archivo debe coincidir con el nombre del competidor.
+                Las fotos de los jurados deben tener el nombre que se mostrara para el mismo en la aplicacion!
                 <div className="container">
                     <div>
                         <div className="form-group">
-                            <input ref={(ref) => { this.uploadInput = ref; }} className="form-control"  type="file" name="photos" multiple />
+                            <input ref={(ref) => { this.uploadInput = ref; }} className="form-control"  type="file" name="photos" onChange={self.photosChanged.bind(self)} multiple />
                         </div>
                     </div>
                 </div>
-                Luego subir las nombres de los competidores. Debe coincidir con el nombre que se uso para su archivo de imagen
                 <div className="playersDataContainer">
-                    <button type="button" onClick={this.anadirJugador.bind(this)}>Agregar jugador</button>
-                    {this.state.players.length > 1 && <button type="button" onClick={this.quitarJugador.bind(this)}>Quitar jugador</button>}
                     <div className="playersAddList">
                         {this.state.players.map(function(player, index){
                             return <li className="playerLi" key={ index }>
@@ -164,8 +203,10 @@ class Players extends Component {
                         })}
                     </div>
                     {isPowerOfTwo ? <input type="submit" value="Subir competidores!" /> : <span>Aun no puedes subir los competidores, deben ser potencia de 2</span>}
+                    <button type="button" value="Eliminar competidores actuales" onClick={this.eliminarCompetidores.bind(this)} >Eliminar todos los competidores del servidor</button>
                 </div>
-            </form>
+            </form>}
+            </div>
         )
     }
 }

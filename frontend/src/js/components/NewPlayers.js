@@ -23,7 +23,7 @@ class NewPlayers extends Component {
             return
         }
         try {
-            const response = await axios.post(baseApiUrl + 'battlePlayers', { p1: this.state.newP1Name, p2: this.state.newP2Name});
+            const response = await axios.post(baseApiUrl + 'currentBattle', { p1: this.state.newP1Name, p2: this.state.newP2Name});
             console.log(response);
             alert("Nuevos competidores enviados exitosamente");
         } catch (err) {

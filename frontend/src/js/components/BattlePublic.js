@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
 import Pusher from 'pusher-js'
-import {PUSHER_APP_KEY, baseImagesUri, juries} from '../../config/frontendConfig';
-import PlayersService from '../services/PlayersService';
+import {PUSHER_APP_KEY, baseImagesUri} from '../../config/frontendConfig';
+import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
@@ -10,14 +10,9 @@ class BattlePublic extends Component{
 
     constructor () {
         super();
-        let juriesStart = juries.map(function(jname) {
-            return {
-                name: jname,
-                p1: 0,
-                p2: 0
-            };
-        } );
+        let juriesStart = [];
         this.state = {
+            battleId: -1,
             p1Name: "",
             p2Name: "",
             imgPlayer1: "",
@@ -26,37 +21,31 @@ class BattlePublic extends Component{
         }
     }
 
-    componentWillMount() {
-        this.pusher = new Pusher(PUSHER_APP_KEY, {
-            cluster: 'us2',
-            encrypted: true,
-        });
-        this.channel = this.pusher.subscribe('battle_points');
-    }
-
     async componentDidMount() {
-        this.channel.bind('newPoints', this.updateEvents, this);
-        let response = await PlayersService.getCurrentBattlePlayers();
+        let response = await BattleService.getCurrentBattle(),
+            self = this;
         this.setState({
+            battleId: response._id,
             imgPlayer1: baseImagesUri + response.player1 + ".jpg",
             imgPlayer2: baseImagesUri + response.player2 + ".jpg",
             p1Name: response.player1,
-            p2Name: response.player2
+            p2Name: response.player2,
+            juriesScores: response.juryScores
         });
+        setInterval(async function(){
+            await self.updatePointsFromserver();
+        }, 5000);
     }
 
-    componentWillUnmount() {
-        this.channel.unbind();
-
-        this.pusher.unsubscribe(this.channel);
-    }
-
-    updateEvents(data) {
-
-        let newAuthorPoints = this.state.juriesScores.find(jscore => jscore.name == data.author );
-        newAuthorPoints.p1 = data.p1;
-        newAuthorPoints.p2 = data.p2;
-        this.forceUpdate();
+    async updatePointsFromserver() {
+        let battle = await BattleService.getCurBattlePoints(this.state.battleId);
+        this.setState({
+                juriesScores: battle.juryScores.map(function(score){return {
+                    name: score.name,
+                    p1: score.p1,
+                    p2: score.p2
+                };})
+        });
     }
 
     fixJuryCompetitorImgSrc(target) {

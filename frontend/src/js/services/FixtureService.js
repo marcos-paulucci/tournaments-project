@@ -12,6 +12,18 @@ class FixtureService {
         }
     };
 
+    async eliminarFixture(fixtureId) {
+        try {
+            await axios.delete(baseApiUrl +  'fixture', {
+                params: {
+                    id: fixtureId
+                }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     async getFixture() {
         let response = "";
         try {

@@ -12,11 +12,11 @@ import FixtureView from "./components/FixtureView";
 const routes = (
 
   <BrowserRouter history={browserHistory} path="/" component={App}>
-      <Route path="battleJury/:juryName" component={JuryScreen} />
-      <Route path="battle" component={BattlePublic} />
-      <Route path="players" component={Players} />
-      <Route path="juries" component={Juries} />
-      <Route path="fixture" component={FixtureView} />
+      <Route path="/:style/vote/:juryName" component={JuryScreen} />
+      <Route path="/:style/battle" component={BattlePublic} />
+      <Route path="/:style/players" component={Players} />
+      <Route path="/:style/juries" component={Juries} />
+      <Route path="/:style/fixture" component={FixtureView} />
   </BrowserRouter>
 );
 

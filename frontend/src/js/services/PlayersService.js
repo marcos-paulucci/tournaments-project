@@ -4,17 +4,6 @@ import axios from "axios/index";
 
 class PlayersService {
 
-    async getCurrentBattlePlayers() {
-        let response = "";
-        try {
-            response = await axios.get(baseApiUrl +  'battlePlayers');
-
-        } catch (error) {
-            console.error(error);
-        }
-        return response.data;
-    };
-
     async getAllPlayers() {
         let response = "";
         try {
@@ -24,6 +13,17 @@ class PlayersService {
             console.error(error);
         }
         return response.data;
+    };
+
+    async deleteAllPlayers() {
+        let response = "";
+        try {
+            response = await axios.delete(baseApiUrl +  'playersNames');
+
+        } catch (err){
+            console.log(err);
+        }
+        return response.status;
     };
 
 }

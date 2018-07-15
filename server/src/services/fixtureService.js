@@ -2,29 +2,14 @@ var Battle  = require('../models/battle');
 var Player  = require('../models/player');
 var Fixture  = require('../models/fixture');
 var Jury  = require('../models/jury');
+var BattleService  = require('./battleService');
 
 class FixtureService {
 
         async createFixture(cli, style) {
-            debugger;
             var battlesArr = [];
-            var juries = [];
-            var initialJuryScores = [];
-            await Jury.find({}, function(err, js) {
-                js.forEach(function(j) {
-                    juries.push(j);
-                });
-                initialJuryScores = juries.map(function(j){
-                    return {
-                        name: j.name,
-                        p1: 0,
-                        p2: 0
-                    }
-                });
-            });
             var players = [];
             await Player.find({}, function(err, ps) {
-
                 //creacion de las batallas de primera ronda
                 for (let i = 0; i < ps.length; i++){
                     players.push(ps[i]);
@@ -32,17 +17,8 @@ class FixtureService {
             });
 
             for (let i = 0; i < players.length; i+= 2){
-                await Battle.create({
-                    player1: players[i].name,
-                    player2: players[i+1].name,
-                    juryScores: initialJuryScores
-                }, function (err, battle) {
-                    if (err) {
-                        console.log('CREATE Error: ' + err);
-                    } else {
-                        battlesArr.push({battleId: battle._id, player1: battle.player1, player2: battle.player2 });
-                    }
-                });
+                let newBattleId = await BattleService.createBattle( players[i].name,players[i+1].name);
+                battlesArr.push(newBattleId);
             }
 
             //creacion de las batallas de cuartos, semis, etc, con competidores por ahora indefinidos
@@ -50,13 +26,8 @@ class FixtureService {
                 createdBattles = players.length / 2,
                 remainingBattlesToCreate = totalBattles - createdBattles;
             for (let j = 0; j < remainingBattlesToCreate; j++){
-                await Battle.create({  }, function (err, battle) {
-                    if (err) {
-                        console.log('CREATE Error: ' + err);
-                    } else {
-                        battlesArr.push({battleiD: battle._id, player1: "", player2: ""});
-                    }
-                });
+                let newBattleId = await BattleService.createBattle( );
+                battlesArr.push(newBattleId);
             }
 
             await Fixture.create({
@@ -68,13 +39,53 @@ class FixtureService {
                     console.log('CREATE Error: ' + err);
                     cli.callback(null, err);
                 } else {
-                    debugger;
                     cli.callback(fx);
                 }
             });
         };
 
-    }
+    async getFixture(cli) {
+        var battlesArr = [];
+        Fixture.findOne({}, {}, { sort: { 'created_at' : -1 } }, async function(err, fx) {
+
+            if (err) {
+                console.log('Fixture search Error: ' + err);
+            } else if (fx) {
+                for (let i = 0; i < fx.battles.length; i++){
+                    await Battle.findById(fx.battles[i], function (err, bt) {
+                        if (err) {
+                            console.log('Battle search Error: ' + err);
+                        } else {
+                            battlesArr.push(bt);
+                        }
+                    });
+                }
+                cli.callback({
+                    id: fx._id,
+                    style: fx.style,
+                    date: fx.date,
+                    battles: battlesArr
+                });
+            } else {
+                //not found
+                cli.callback({ });
+            }
+
+
+        });
+    };
+
+    async removeFixture(callback, id) {
+        await Fixture.findById(id, async function(err, fx) {
+            for (let i = 0; i < fx.battles.length; i++){
+                await BattleService.deleteBattle( fx.battles[i]);
+            }
+        });
+        await Fixture.findByIdAndRemove(id);
+        callback();
+    };
+
+}
 
 let fixtureService = new FixtureService();
 module.exports = fixtureService;

@@ -4,6 +4,8 @@ import Pusher from 'pusher-js'
 import {PUSHER_APP_KEY, baseImagesUri, baseApiUrl, puntosPorBatalla} from '../../config/frontendConfig'
 import axios from 'axios';
 import PlayersService from '../services/PlayersService';
+import JuryService from '../services/JuryService';
+import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 
@@ -11,8 +13,9 @@ class JuryScreen extends Component{
 
 
     constructor () {
-        super()
+        super();
         this.state = {
+            battleId: -1,
             points: [0, 0],
             juryName: "",
             p1Name: "",
@@ -27,20 +30,15 @@ class JuryScreen extends Component{
     }
 
 
-    componentWillMount() {
-        this.pusher = new Pusher(PUSHER_APP_KEY, {
-            cluster: 'us2',
-            encrypted: true,
-        });
-        this.channel = this.pusher.subscribe('battle_points');
-    }
-
-
-
     async componentDidMount() {
         let location = window.location.href,
             juryName = location.substring(location.lastIndexOf("/") + 1, location.length);
-        let response = await PlayersService.getCurrentBattlePlayers(),
+        let isJuryNameValid = await JuryService.checkJuryName(juryName);
+        if (isJuryNameValid !== 200) {
+            alert("Verifique su nombre de jurado! Parece que lo ha escrito mal, o no esta cargado en el sistema");
+            return;
+        }
+        let response = await BattleService.getCurrentBattle(),
             imgPlayer1 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw",
             imgPlayer2 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw";
         try {
@@ -54,31 +52,22 @@ class JuryScreen extends Component{
             console.log(err);
         }
         this.setState({
+            battleId: response._id,
             juryName: juryName,
             imgPlayer1: imgPlayer1,
             imgPlayer2: imgPlayer2,
             p1Name: response.player1,
             p2Name: response.player2
         });
-        //this.channel.bind('newPoints', this.updateEvents, this);
     }
 
-    componentWillUnmount() {
-        this.channel.unbind();
 
-        this.pusher.unsubscribe(this.channel);
+    async sendPointsToServer(){
+        let { battleId, points, juryName } = this.state;
+        await BattleService.sendCurBattleJuryPoints(battleId, juryName, points[0], points[1]);
     }
 
-    updateEvents(data) {
-        // let newArray = this.state.points.slice(0);
-        // newArray.unshift(data);
-
-        this.setState({
-            points: [data.p1, data.p2],
-        });
-    }
-
-    async sumarJugador(index){
+    sumarJugador(index){
         let { points, juryName } = this.state;
         if (points[index] === puntosPorBatalla)
             return;
@@ -89,23 +78,17 @@ class JuryScreen extends Component{
             let subsIndex = (index === 0 ? 1 : 0);
             points[subsIndex] --;
         }
-        try {
-            const response = await axios.post(baseApiUrl + 'new', { author: juryName, p1: points[0], p2: points[1] });
-            console.log(response);
-            this.setState({
-                points: points
-            })
-        } catch (err) {
-            console.log(err);
-        }
+        this.setState({
+            points: points
+        });
     }
 
-    async sumarJugador1(){
-        await this.sumarJugador(0);
+    sumarJugador1(){
+        this.sumarJugador(0);
     }
 
-    async sumarJugador2(){
-        await this.sumarJugador(1);
+    sumarJugador2(){
+        this.sumarJugador(1);
     }
 
     render() {
@@ -155,6 +138,7 @@ class JuryScreen extends Component{
                         </div>
                         <img src={imgSrcIcon} className="sumarJugador2" style={{width: '60px', height: '60px'}}  onClick={this.sumarJugador2.bind(this)} />
                     </div>
+                    <button type="button" onClick={this.sendPointsToServer.bind(this)}> Enviar puntos!</button>
                 </div>
             </div>
         );
