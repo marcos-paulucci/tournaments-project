@@ -32,7 +32,7 @@ class FixtureView extends Component {
             this.initialState();
             return;
         }
-        let battles = fixtureResponse.battles.map(function(b){ return {isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
+        let battles = fixtureResponse.battles.map(function(b){ return {winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
         this.setState({
             fixtureId: fixtureResponse.id,
             style: fixtureResponse.style,
@@ -74,6 +74,18 @@ class FixtureView extends Component {
         }
     }
 
+    async closeBattle(e) {
+        let battleId = e.target.id.split(".")[0];
+        try {
+            await BattleService.closeBattle(battleId);
+            await this.fetchFixture();
+        } catch (err){
+            console.log(err);
+        }
+    }
+
+
+
 
     render() {
         const self = this;
@@ -85,10 +97,12 @@ class FixtureView extends Component {
                     {this.state.battles.map(function(battle, index){
                         return <li className="battleLi" key={ index }>
                             <div>Battle # {index + 1}</div>
-                            <div>{battle.p1}</div>
-                            <div>{battle.p2}</div>
-                            <div>{battle.isCurrent ? "Proxima batalla!" : ""}</div>
-                            <button type="button" id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Proxima batalla!</button>
+                            <div>Competidor 1: {battle.p1}</div>
+                            <div>Competidor 2: {battle.p2}</div>
+                            {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
+                            {battle.isCurrent ? <div><div>Esta es la proxima batalla!</div>
+                                <button type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
+                            {battle.winner === "" && battle.p1 !== "" ? <button type="button" id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
                         </li>;
                     })}
                 </div>

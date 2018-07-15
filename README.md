@@ -9,7 +9,7 @@ You can follow the [tutorial](https://pusher.com/tutorials/activity-feed-react/)
 3. Start the MongoDB server
 4. Execute `npm install` to download dependencies.
 5. Execute
-PUSHER_APP_ID=544656 PUSHER_APP_KEY=a23ec57766308fc4aa52 PUSHER_APP_SECRET=4ed610788e906066e543 node --inspect-brk server.js 
+node --inspect-brk server.js 
 to set the environment variables needed by the app with your Pusher info and start it.
 6. Go to `http://localhost:3000` and start sending playing with the app using [Postman](https://www.getpostman.com/) to communicate with the API or the Pusher console to test only the front-end part. 
 

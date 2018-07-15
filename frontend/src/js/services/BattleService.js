@@ -46,6 +46,14 @@ class BattleService {
         return response.data;
     };
 
+    async closeBattle(battleId) {
+        try {
+            await axios.post(baseApiUrl +  'closeBattle', {battleId} );
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 }
 
 let battleService = new BattleService();

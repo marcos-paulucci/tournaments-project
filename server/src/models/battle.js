@@ -7,7 +7,9 @@ var battleSchema = new Schema({
     style: { type: String },
     juryScores: {type: Array, default: []},
     winner:  { type: String, default: '' },
-    isCurrent: { type: Boolean, default: false }
+    isCurrent: { type: Boolean, default: false },
+    idForFixture: {type: Number, default: 0},
+    nextBattleIdFix: {type: Number, default: 0}
 });
 
 

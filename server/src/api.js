@@ -57,6 +57,12 @@ router.route('/currentBattle')
     });
 });
 
+router.route('/closeBattle')
+    .post(async (req, res) => {
+        await battleService.closeBattle(function(){
+            res.status(200).send('Batalla cerrada y guardada con exito!');
+        }, req.body.battleId);
+    });
 
 
 

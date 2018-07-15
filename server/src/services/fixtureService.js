@@ -16,8 +16,12 @@ class FixtureService {
                 }
             });
 
-            for (let i = 0; i < players.length; i+= 2){
-                let newBattleId = await BattleService.createBattle( players[i].name,players[i+1].name);
+            for (let i = 0, idForFixture = 1; i < players.length; i+= 2, idForFixture++){
+                let newBattleId = await BattleService.createBattle(
+                    players[i].name,players[i+1].name,
+                    false,
+                    idForFixture,
+                    (idForFixture));
                 battlesArr.push(newBattleId);
             }
 
@@ -25,8 +29,8 @@ class FixtureService {
             const totalBattles = players.length - 1,
                 createdBattles = players.length / 2,
                 remainingBattlesToCreate = totalBattles - createdBattles;
-            for (let j = 0; j < remainingBattlesToCreate; j++){
-                let newBattleId = await BattleService.createBattle( );
+            for (let j = createdBattles; j < remainingBattlesToCreate + createdBattles; j++){
+                let newBattleId = await BattleService.createBattle( "","", false, j, nextBattleCalculator(j));
                 battlesArr.push(newBattleId);
             }
 

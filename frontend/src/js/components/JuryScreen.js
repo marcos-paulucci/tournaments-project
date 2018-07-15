@@ -21,7 +21,8 @@ class JuryScreen extends Component{
             p1Name: "",
             p2Name: "",
             imgPlayer1: "",
-            imgPlayer2: ""
+            imgPlayer2: "",
+            juryNameValid: true
         }
     }
 
@@ -36,6 +37,9 @@ class JuryScreen extends Component{
         let isJuryNameValid = await JuryService.checkJuryName(juryName);
         if (isJuryNameValid !== 200) {
             alert("Verifique su nombre de jurado! Parece que lo ha escrito mal, o no esta cargado en el sistema");
+            this.setState({
+                juryNameValid: false
+            });
             return;
         }
         let response = await BattleService.getCurrentBattle(),
@@ -59,6 +63,17 @@ class JuryScreen extends Component{
             p1Name: response.player1,
             p2Name: response.player2
         });
+        let battleSavedPoints = await BattleService.getCurBattlePoints(this.state.battleId);
+
+        const self = this,
+            myscore = battleSavedPoints.juryScores.filter(function(score){
+            return score.name === self.state.juryName
+        });
+        if (myscore){
+            this.setState({
+                points: [myscore[0].p1, myscore[0].p2]
+            });
+        }
     }
 
 
@@ -102,6 +117,7 @@ class JuryScreen extends Component{
             c2 = 'red';
         }
         return (
+
             <div style={{ backgroundImage: `linear-gradient(to bottom, rgba(188,216,95,0.6) 0%,rgba(255,255,255,0.6) 100%), url(${Background})` }}>
                 <FlexView
                     grow={1}
@@ -112,7 +128,7 @@ class JuryScreen extends Component{
                 >
                     Juez {this.state.juryName}
                 </FlexView>
-
+                {this.state.juryNameValid &&
                 <div>
                     <div style={{ textAlign: 'center', marginBottom: '1em'}}>
                         <span style={{display: 'inline-block', fontSize: '1.5em', marginRight: '0.5em'}}>
@@ -138,8 +154,10 @@ class JuryScreen extends Component{
                         </div>
                         <img src={imgSrcIcon} className="sumarJugador2" style={{width: '60px', height: '60px'}}  onClick={this.sumarJugador2.bind(this)} />
                     </div>
-                    <button type="button" onClick={this.sendPointsToServer.bind(this)}> Enviar puntos!</button>
-                </div>
+                    <div style={{width: '100%', textAlign: 'center'}}>
+                        <button style={{borderRadius: '10px', width: '60%', fontSize: '2em'}} type="button" onClick={this.sendPointsToServer.bind(this)}> Enviar puntos!</button>
+                    </div>
+                </div>}
             </div>
         );
     }
