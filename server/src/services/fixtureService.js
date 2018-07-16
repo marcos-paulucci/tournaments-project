@@ -3,7 +3,7 @@ var Player  = require('../models/player');
 var Fixture  = require('../models/fixture');
 var Jury  = require('../models/jury');
 var BattleService  = require('./battleService');
-
+var nextBattleCalculator = require('./nextBattleCalculator');
 class FixtureService {
 
         async createFixture(cli, style) {
@@ -21,7 +21,7 @@ class FixtureService {
                     players[i].name,players[i+1].name,
                     false,
                     idForFixture,
-                    (idForFixture));
+                    nextBattleCalculator(idForFixture, players.length));
                 battlesArr.push(newBattleId);
             }
 
@@ -29,8 +29,8 @@ class FixtureService {
             const totalBattles = players.length - 1,
                 createdBattles = players.length / 2,
                 remainingBattlesToCreate = totalBattles - createdBattles;
-            for (let j = createdBattles; j < remainingBattlesToCreate + createdBattles; j++){
-                let newBattleId = await BattleService.createBattle( "","", false, j, nextBattleCalculator(j));
+            for (let j = createdBattles + 1; j < remainingBattlesToCreate + createdBattles + 1; j++){
+                let newBattleId = await BattleService.createBattle( "","", false, j, nextBattleCalculator(j, players.length));
                 battlesArr.push(newBattleId);
             }
 

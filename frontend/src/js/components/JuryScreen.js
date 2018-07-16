@@ -69,7 +69,7 @@ class JuryScreen extends Component{
             myscore = battleSavedPoints.juryScores.filter(function(score){
             return score.name === self.state.juryName
         });
-        if (myscore){
+        if (myscore && myscore.length > 0){
             this.setState({
                 points: [myscore[0].p1, myscore[0].p2]
             });

@@ -64,6 +64,7 @@ class BattleService {
                 await battle.save(function () { });
                 await self.deleteInmemoActiveBattle(battleId);
                 await self.setPlayerNextBattle(battle.nextBattleIdFix, winner);
+                callback();
             } else {
                 callback();
             }
@@ -71,7 +72,7 @@ class BattleService {
     };
 
     async setPlayerNextBattle(nextBattleId, player) {
-        Battle.findOne({ nextBattleIdFix: nextBattleId }, async function(err, bt) {
+        Battle.findOne({ idForFixture: nextBattleId }, async function(err, bt) {
             if (err) {
                 console.log('Next battle error, not found to set player: ' + err);
             } else if (bt) {
@@ -104,12 +105,15 @@ class BattleService {
     };
 
     async insertInmemoActiveBattle(battle) {
+        if (battle.juryScores.length === 0 || battle.juryScores[0].name === ""){
+            throw Error("que carajo que llega sin scores?????");
+        }
         currentBattlesInMemo.insert(battle);
         lokiDb.saveDatabase();
     };
 
     async updateInmemoActiveBattlePoints(battleId, newJuryScores){
-        var bt = this.getInmemoActiveBattleById(null, battleId);
+        var bt = await this.getInmemoActiveBattleById(null, battleId);
         let newScores = bt.juryScores.map(function(score, index) {
             if (score.name == newJuryScores.name){
                 return newJuryScores;
@@ -117,12 +121,12 @@ class BattleService {
             return score;
         });
         bt.juryScores = newScores;
-        currentBattlesInMemo.save(bt);
+        currentBattlesInMemo.update(bt);
         lokiDb.saveDatabase();
     };
 
     async deleteInmemoActiveBattle(battleId){
-        var bt = this.getInmemoActiveBattleById(null, battleId);
+        var bt = await this.getInmemoActiveBattleById(null, battleId);
         currentBattlesInMemo.remove(bt);
         lokiDb.saveDatabase();
     };
