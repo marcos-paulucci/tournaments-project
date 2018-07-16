@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import FixtureService from "../services/FixtureService";
 import BattleService from "../services/BattleService";
+import {getLevel, getLevelsRange} from "../services/fixtureUtilities";
 
 class FixtureView extends Component {
 
@@ -14,6 +15,9 @@ class FixtureView extends Component {
     constructor(props) {
         super(props);
         this.initialState = this.initialState.bind(this);
+
+        this.prepareFixtureForView = this.prepareFixtureForView.bind(this);
+
         this.state = {
             fixtureId: null,
             style: "",
@@ -32,7 +36,8 @@ class FixtureView extends Component {
             this.initialState();
             return;
         }
-        let battles = fixtureResponse.battles.map(function(b){ return {winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
+
+        let battles = fixtureResponse.battles.map(function(b){ return {idForFixture: b.idForFixture ,winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
         this.setState({
             fixtureId: fixtureResponse.id,
             style: fixtureResponse.style,
@@ -84,26 +89,68 @@ class FixtureView extends Component {
         }
     }
 
+    prepareFixtureForView(){
+
+        if (this.state.battles.length === 0){
+            return [];
+        }
+
+        let levels = getLevelsRange(this.state.battles.length + 1),
+            fixtureSerialized = [],
+            battlesByLevel = [],
+            totalPlayers = this.state.battles.length + 1;
+        for (let i = 0; i < this.state.battles.length; i++){
+            let batLevel = getLevel(this.state.battles[i].idForFixture, totalPlayers / 2);
+            if (!battlesByLevel[batLevel]){
+                battlesByLevel[batLevel] = [];
+            }
+            battlesByLevel[batLevel].push(this.state.battles[i]);
+        }
+
+        for (let level in battlesByLevel) {
+            if (battlesByLevel.hasOwnProperty(level)) {
+                fixtureSerialized.push({
+                    level: level,
+                    levelName: levels[level],
+                    battles: battlesByLevel[level]
+                });
+            }
+        }
+        return fixtureSerialized.sort(
+            function(l1, l2){
+                return l1.level >  l2.level;
+            });
+    }
+
 
 
 
     render() {
+
         const self = this;
+        let serialized = this.prepareFixtureForView();
         return(
             <div className="fixtureContainer">
                 <button type="button" onClick={this.crearFixture.bind(this)}>Crear fixture!</button>
                 {this.state.fixtureId ? <button type="button" onClick={this.borrarFixture.bind(this)}>Borrar fixture</button> : <span></span>}
                 <div className="battlesList">
-                    {this.state.battles.map(function(battle, index){
-                        return <li className="battleLi" key={ index }>
-                            <div>Battle # {index + 1}</div>
-                            <div>Competidor 1: {battle.p1}</div>
-                            <div>Competidor 2: {battle.p2}</div>
-                            {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
-                            {battle.isCurrent ? <div><div>Esta es la proxima batalla!</div>
-                                <button type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
-                            {battle.winner === "" && battle.p1 !== "" ? <button type="button" id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
-                        </li>;
+                    {serialized.map(function(lvl, index){
+                        return <div className="fixtureLevel" key={ index + 'lvl.level'}>
+                            <div>{lvl.levelName}</div>
+                            <ul>
+                            {lvl.battles.map(function(battle, index){
+                                return <li className="battleLi" key={ index }>
+                                    <div>Battle # {index + 1}</div>
+                                    <div>Competidor 1: {battle.p1}</div>
+                                    <div>Competidor 2: {battle.p2}</div>
+                                    {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
+                                    {battle.isCurrent ? <div><div>Esta es la proxima batalla!</div>
+                                        <button type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
+                                    {battle.winner === "" && battle.p1 !== "" ? <button type="button" id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
+                                </li>;
+                            })}
+                            </ul>
+                        </div>;
                     })}
                 </div>
             </div>
