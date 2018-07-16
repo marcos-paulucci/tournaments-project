@@ -130,23 +130,33 @@ class FixtureView extends Component {
         const self = this;
         let serialized = this.prepareFixtureForView();
         return(
-            <div className="fixtureContainer">
-                <button type="button" onClick={this.crearFixture.bind(this)}>Crear fixture!</button>
-                {this.state.fixtureId ? <button type="button" onClick={this.borrarFixture.bind(this)}>Borrar fixture</button> : <span></span>}
-                <div className="battlesList">
+            <div className="fixtureContainer" style={{width: '100%', textAlign: 'center'}}>
+                <div style={{width: '100%', textAlign: 'center'}}>
+                    {!this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearFixture.bind(this)}>Crear fixture!</button> : <span></span>}
+                    {this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.borrarFixture.bind(this)}>Borrar fixture</button> : <span></span>}
+                </div>
+
+                <div className="battlesList" style={{width: '100%', textAlign: 'center', padding: '1em'}}>
                     {serialized.map(function(lvl, index){
-                        return <div className="fixtureLevel" key={ index + 'lvl.level'}>
-                            <div>{lvl.levelName}</div>
+                        return <div className="fixtureLevel" style={{borderRadius: '20px', border: '2px solid black', display: 'block',  width: '100%', textAlign: 'center' }} key={ index + 'lvl.level'}>
+                            <div style={{fontSize: '2em' }}>{lvl.levelName}</div>
                             <ul>
                             {lvl.battles.map(function(battle, index){
-                                return <li className="battleLi" key={ index }>
-                                    <div>Battle # {index + 1}</div>
-                                    <div>Competidor 1: {battle.p1}</div>
-                                    <div>Competidor 2: {battle.p2}</div>
-                                    {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
-                                    {battle.isCurrent ? <div><div>Esta es la proxima batalla!</div>
-                                        <button type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
-                                    {battle.winner === "" && battle.p1 !== "" ? <button type="button" id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
+                                return <li className="battleLi" style={{width: '100%', height: '7em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
+                                    <div style={{width: '80%', margin: 'auto' }}>
+                                        <div style={{float: 'left', width: '60%' }}>
+                                            <div>Battle # {battle.idForFixture}</div>
+                                            <div>Competidor 1: {battle.p1}</div>
+                                            <div>Competidor 2: {battle.p2}</div>
+                                            {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
+                                        </div>
+
+                                        <div class="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>
+                                            {battle.isCurrent ? <div><div style={{fontSize: '1.2em' }}>Esta es la proxima batalla!</div>
+                                                <button style={{fontSize: '1.2em' }} type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
+                                            {battle.winner === "" && battle.p1 !== "" ? <button type="button" style={{fontSize: '1.2em' }} id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
+                                        </div>
+                                    </div>
                                 </li>;
                             })}
                             </ul>

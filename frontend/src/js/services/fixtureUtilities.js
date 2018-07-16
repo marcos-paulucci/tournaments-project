@@ -13,7 +13,6 @@ function getLevel(battleId, numberOfBattlesZero) {
 }
 
 function getLevelsRange(numberOfParticipants) {
-    debugger;
     let maxLevel = getLevel(numberOfParticipants - 1, numberOfParticipants / 2),
         list = [];
     for (let i = 1; i <= maxLevel; i++) {

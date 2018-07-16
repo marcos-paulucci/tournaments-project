@@ -61,3 +61,7 @@ h1 {
 .Toastify__close-button {
     display: none !important;
 }
+
+ul {
+    list-style-type: none;
+}

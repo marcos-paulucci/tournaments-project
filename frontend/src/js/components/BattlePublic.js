@@ -4,6 +4,7 @@ import Pusher from 'pusher-js'
 import {PUSHER_APP_KEY, baseImagesUri} from '../../config/frontendConfig';
 import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
+import AnimatedNumber from 'react-animated-number';
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 class BattlePublic extends Component{
@@ -86,7 +87,20 @@ class BattlePublic extends Component{
                     >
                         <FlexView hAlignContent='center' style={{display: 'block', textAlign: 'center'}}>
                             <span style={{display: 'inline-block', fontSize: '2em', marginRight: '0.5em'}}> {this.state.p1Name}</span>
-                            <span style={{display: 'inline-block', fontSize: '4em', color: c1}}> {totalP1}</span>
+                            <span style={{display: 'inline-block', fontSize: '4em', color: c1}}>
+                                <AnimatedNumber
+                                    style={{
+                                        transition: '3s ease-out',
+                                        transitionProperty:
+                                            'background-color, color'
+                                    }}
+                                    frameStyle={perc => (
+                                        perc === 100 ? {} : {backgroundColor: 'rgb(188, 216, 95)'}
+                                    )}
+                                    stepPrecision={0}
+                                    value={totalP1}
+                                    formatValue={n => n}/>
+                                </span>
                         </FlexView>
                         <FlexView hAlignContent='center' style={{display: 'inline-block'}}>
                             <img style={{width: '80%', height: '80%', borderRadius: '10px'}} onError={this.fixJuryCompetitorImgSrc}  src={this.state.imgPlayer1} />
@@ -103,7 +117,20 @@ class BattlePublic extends Component{
                         width="35%">
                         <FlexView hAlignContent='center' style={{display: 'block', textAlign: 'center'}}>
                             <span style={{display: 'inline-block', fontSize: '2em', marginRight: '0.5em'}}> {this.state.p2Name}</span>
-                            <span style={{display: 'inline-block', fontSize: '4em', color: c2}}> {totalP2}</span>
+                            <span style={{display: 'inline-block', fontSize: '4em', color: c2}}>
+                                <AnimatedNumber
+                                    style={{
+                                        transition: '3s ease-out',
+                                        transitionProperty:
+                                            'background-color, color'
+                                    }}
+                                    frameStyle={perc => (
+                                        perc === 100 ? {} : {backgroundColor: 'rgb(188, 216, 95)'}
+                                    )}
+                                    stepPrecision={0}
+                                    value={totalP2}
+                                    formatValue={n => n}/>
+                            </span>
                         </FlexView>
                         <FlexView hAlignContent='center' style={{display: 'inline-block'}}>
                             <img style={{width: '80%', height: '80%', borderRadius: '10px'}} onError={this.fixJuryCompetitorImgSrc} src={this.state.imgPlayer2} />
