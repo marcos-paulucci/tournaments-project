@@ -19,7 +19,6 @@ class FixtureView extends Component {
         this.prepareFixtureForView = this.prepareFixtureForView.bind(this);
 
         this.state = {
-            fixtureId: null,
             style: "",
             battles: []
         };
@@ -31,7 +30,10 @@ class FixtureView extends Component {
     }
 
     async fetchFixture() {
-        let fixtureResponse = await FixtureService.getFixture();
+        let fixtureResponse = await FixtureService.getFixture(this.props.match.params.torneoName, this.props.match.params.style);
+        this.setState({
+            fixtureId: fixtureResponse.id
+        });
         if (fixtureResponse == null || fixtureResponse.battles == null || fixtureResponse.battles.length == 0 ){
             this.initialState();
             return;
@@ -39,7 +41,6 @@ class FixtureView extends Component {
 
         let battles = fixtureResponse.battles.map(function(b){ return {idForFixture: b.idForFixture ,winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
         this.setState({
-            fixtureId: fixtureResponse.id,
             style: fixtureResponse.style,
             battles: battles
         });
@@ -51,7 +52,7 @@ class FixtureView extends Component {
 
     async crearBatallasFixture(){
         try {
-            await FixtureService.crearBatallasFixture(this.props.match.params.torneoName, this.props.match.params.style);
+            await FixtureService.crearBatallasFixture(this.state.fixtureId);
             await this.fetchFixture();
         } catch (err) {
             console.log(err);
@@ -61,7 +62,7 @@ class FixtureView extends Component {
     async borrarFixture (){
         const self = this;
         try {
-            await FixtureService.eliminarFixture(this.props.match.params.torneoName, this.props.match.params.style);
+            await FixtureService.eliminarBatallasFixture(this.state.fixtureId);
             await self.fetchFixture();
 
         } catch (err) {
@@ -72,7 +73,7 @@ class FixtureView extends Component {
     async setCurrentBattle(e) {
         let battleId = e.target.id;
         try {
-            await BattleService.setNextBattle(battleId);
+            await BattleService.setNextBattle(battleId, this.props.match.params.style, this.state.fixtureId);
             await this.fetchFixture();
         } catch (err){
             console.log(err);
@@ -82,7 +83,8 @@ class FixtureView extends Component {
     async closeBattle(e) {
         let battleId = e.target.id.split(".")[0];
         try {
-            await BattleService.closeBattle(battleId);
+            debugger;
+            await BattleService.closeBattle(battleId, this.state.fixtureId);
             await this.fetchFixture();
         } catch (err){
             console.log(err);
@@ -132,8 +134,8 @@ class FixtureView extends Component {
         return(
             <div className="fixtureContainer" style={{width: '100%', textAlign: 'center'}}>
                 <div style={{width: '100%', textAlign: 'center'}}>
-                    {!this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearBatallasFixture.bind(this)}>Crear fixture!</button> : <span></span>}
-                    {this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.borrarFixture.bind(this)}>Borrar fixture</button> : <span></span>}
+                    {this.state.battles.length ===  0 ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearBatallasFixture.bind(this)}>Crear fixture!</button> : <span></span>}
+                    {this.state.battles.length > 0 ? <button style={{fontSize: '2em'}} type="button" onClick={this.borrarFixture.bind(this)}>Resetear batallas del fixture</button> : <span></span>}
                 </div>
 
                 <div className="battlesList" style={{width: '100%', textAlign: 'center', padding: '1em'}}>
@@ -151,7 +153,7 @@ class FixtureView extends Component {
                                             {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
                                         </div>
 
-                                        <div class="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>
+                                        <div className="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>
                                             {battle.isCurrent ? <div><div style={{fontSize: '1.2em' }}>Esta es la proxima batalla!</div>
                                                 <button style={{fontSize: '1.2em' }} type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
                                             {battle.winner === "" && battle.p1 !== "" ? <button type="button" style={{fontSize: '1.2em' }} id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}

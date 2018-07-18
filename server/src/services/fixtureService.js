@@ -7,7 +7,7 @@ var BattleService  = require('./battleService');
 var nextBattleCalculator = require('./nextBattleCalculator');
 class FixtureService {
 
-    async createInitialFixture(cli, tournamentName, style) {
+    async createInitialFixture(callback, tournamentName, style) {
         let tournament = await TournamentsService.getTournamentByName(tournamentName);
         await Fixture.create({
             style: style,
@@ -16,12 +16,27 @@ class FixtureService {
         }, function (err, fx) {
             if (err) {
                 console.log('Fixture CREATE Error: ' + err);
-                cli.callback(null, err);
+                callback(null, err);
             } else {
-                cli.callback(fx);
+                callback(fx);
             }
         });
     };
+
+    async removeFixtureBattles(callback, fixtureId){
+        await Fixture.findById(fixtureId, function (err, fxt) {
+            if (err) {
+                console.log("Error searching fixture by id", err);
+            }
+            fxt.battles = [];
+            fxt.save(function (err, updatedFx) {
+                if (err) {
+                    console.log("Error removing fixture battles", err);
+                }
+                callback(updatedFx);
+            });
+        });
+    }
 
     async fixtureCreateBattles(cli, fixtureId) {
         var battlesArr = [],
@@ -44,6 +59,8 @@ class FixtureService {
 
         for (let i = 0, idForFixture = 1; i < players.length; i+= 2, idForFixture++){
             let newBattleId = await BattleService.createBattle(
+                fixtureToUpdate._id,
+                fixtureToUpdate.style,
                 players[i].name,players[i+1].name,
                 false,
                 idForFixture,
@@ -56,7 +73,7 @@ class FixtureService {
             createdBattles = players.length / 2,
             remainingBattlesToCreate = totalBattles - createdBattles;
         for (let j = createdBattles + 1; j < remainingBattlesToCreate + createdBattles + 1; j++){
-            let newBattleId = await BattleService.createBattle( "","", false, j, nextBattleCalculator(j, players.length));
+            let newBattleId = await BattleService.createBattle(fixtureToUpdate._id, fixtureToUpdate.style, "","", false, j, nextBattleCalculator(j, players.length));
             battlesArr.push(newBattleId);
         }
 

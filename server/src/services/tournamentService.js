@@ -64,7 +64,7 @@ class TournamentService {
     async getTourFixture(tournName, style){
         let tournament = await this.getTournamentByName(tournName);
         let fixtures = await FixtureService.getTournamentFixtures(tournament._id);
-        let fixture = fixtures.find(f => f.style = style);
+        let fixture = fixtures.find(f => f.style === style);
         return fixture;
     }
 

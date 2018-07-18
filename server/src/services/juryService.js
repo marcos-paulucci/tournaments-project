@@ -9,18 +9,6 @@ class JuryService {
 
     };
 
-    async deleteAllJuries(callback){
-        await Jury.find({}, function(err, js) {
-            js.forEach(function(j) {
-                var target_path = imagesPath + j.name + ".jpg";
-                fs.unlinkSync(target_path);
-            });
-        });
-        await Jury.remove({}, function(){
-            callback();
-        });
-    };
-
     async deleteJuryById(juryId){
         await Jury.findByIdAndRemove(juryId);
     };
@@ -45,14 +33,13 @@ class JuryService {
     }
 
     async getJuries(callback, torneoName, style){
-        let fxt = await TournamentsService.getTourFixture(torneoName, style),
-            juries = [];
+        let fxt = await TournamentsService.getTourFixture(torneoName, style);
 
-        Jury.find({style: style}, function(err, js) {
+        await Jury.find({style: style}, function(err, js) {
             var juries = [];
             js.forEach(function(j) {
-                j.isJury = fxt.juries.find(j._id)
-                juries.push(j);
+                j.isJury = fxt.juries.indexOf(j._id) >= 0;
+                juries.push({name: j.name, _id: j._id, isJury: j.isJury});
             });
             callback(juries);
         });

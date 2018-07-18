@@ -6,7 +6,7 @@ var fs = require('fs');
 
 class PlayersService {
 
-    async createPlayers(callback, names, style, torneoName){
+    async createPlayers(callback, names, style){
         let createdPlayers = [];
         names.forEach(async function(p){
             await Player.create({
@@ -20,14 +20,7 @@ class PlayersService {
                 }
             });
         });
-        let fixtureUpdate = TournamentsService.getTourFixture(torneoName, style);
-        fixtureUpdate.players = createdPlayers;
-        fixtureUpdate.save(function (err, updatedFx) {
-            if (err) {
-                console.log("Error updating fixture ", err);
-            }
-            callback(updatedFx);
-        });
+        callback();
     };
 
     async deletePlayer(id){
@@ -43,17 +36,6 @@ class PlayersService {
         });
     }
 
-    async deleteAllPlayers(callback){
-        await Player.find({}, function(err, p) {
-            p.forEach(function(j) {
-                var target_path = imagesPath + p.name + ".jpg";
-                fs.unlinkSync(target_path);
-            });
-        });
-        await Player.remove({}, function(){
-            callback();
-        });
-    };
 
     async setPlayersForTournament(callback, tournName, style, playersIds){
         let fx = await TournamentsService.getTourFixture(tournName, style);
@@ -64,7 +46,20 @@ class PlayersService {
             }
             callback(updatedFx);
         });
-    }
+    };
+
+    async getPlayers(callback, torneoName, style){
+        let fxt = await TournamentsService.getTourFixture(torneoName, style);
+
+        await Player.find({style: style}, function(err, pls) {
+            var players = [];
+            pls.forEach(function(p) {
+                p.plays = fxt.players.indexOf(p._id) >= 0;
+                players.push({name: p.name, _id: p._id, plays: p.plays});
+            });
+            callback(players);
+        });
+    };
 
 }
 

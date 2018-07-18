@@ -7,6 +7,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import {baseApiUrl} from '../../config/frontendConfig';
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
 
+class Checky extends React.Component {
+    render() {
+        return (<input type="checkbox" disabled="disabled" checked={this.props.checked} />);
+    }
+}
+
 
 class Juries extends Component {
 
@@ -14,7 +20,7 @@ class Juries extends Component {
         super(props);
         this.state = {
             uploading: false,
-            juries: [{name: ''}],
+            juries: [],
             existentJuries: [],
             tostifyAlert : false
         };
@@ -148,7 +154,7 @@ class Juries extends Component {
     async getJuriesFromServer() {
         let juriesResponse = await JuryService.getAllJurys(this.props.match.params.torneoName, this.props.match.params.style);
         let serverJurys = juriesResponse.map(function(j){ return {id: j._id, name: j.name, isJury: j.isJury};}),
-            finalJurys = serverJurys.length > 0 ? serverJurys : [{name: ""}];
+            finalJurys = serverJurys.length > 0 ? serverJurys : [];
         this.setState({
             existentJuries: finalJurys
         });
@@ -165,12 +171,13 @@ class Juries extends Component {
     juryIsjuryChanged(e) {
         e.preventDefault();
         let id = e.target.id;
-        this.setState({ existentJuries: this.state.existentJuries.map((jury, _idx) => {
-                if (jury.id.toString() !== id.toString()) return jury;
-                // this is gonna create a new object, that has the fields from
-                // `s`, and `name` set to `newName`
-                return { ...jury, isJury: e.target.value };
-            }) });
+        let juriesChanged = this.state.existentJuries.map((jury, _idx) => {
+            if (jury.id.toString() !== id.toString()) return jury;
+            // this is gonna create a new object, that has the fields from
+            // `s`, and `name` set to `newName`
+            return { ...jury, isJury: !jury.isJury };
+        });
+        this.setState({ existentJuries: juriesChanged.sort((j1,j2) => j1.name > j2.name)  });
     }
 
     async selectJuriesTournament(e) {
@@ -187,9 +194,10 @@ class Juries extends Component {
     }
 
 
-    render() {
+render() {
         let self = this;
         let displayTostify = this.state.tostifyAlert ? "block" : "none";
+        let enableSubirJurados = this.state.existentJuries.length > 0 && this.state.existentJuries.filter(j => j.isJury).length > 0;
         return(
             <div>
                 <ToastContainer style={{display: displayTostify,fontSize: '2em' ,height: '100%', width: '100%', textAlign: 'center', position: 'absolute', paddingTop: '5em', backgroundColor: '#bcd85f'}} />
@@ -201,23 +209,27 @@ class Juries extends Component {
                 </div> :
                 <div>
                     <div className="existentJuries">
-                        Jurados existentes en el sistema. Seleccionar los que seran jueces en este torneo para este deporte
-                            {this.state.existentJuries.sort((j1, j2) => j1.isJury ? j1.isJury : j2.isJury ).map(function(jury, index){
-                                return <li className="juryLi" key={ jury.id }>
-                                    <span className="juryName" >{jury.name}</span>
-                                    <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseImagesUri + jury.name + ".jpg"} />
-                                    <input
-                                        name="Seleccionado"
-                                        type="checkbox"
-                                        id={jury.id}
-                                        checked={jury.isJury}
-                                        onChange={self.juryIsjuryChanged.bind(self)} />
-                                </li>;
-                            })}
-                        <input type="button" value="Subir jurados!" onClick={this.selectJuriesTournament.bind(this)}> Establecer jurados!</input>
+                        {this.state.existentJuries.length === 0 ? "No hay jurados en el sistema para este estilo" :
+                            <div>
+                                Jurados existentes en el sistema. Seleccionar los que seran jueces en este torneo para este deporte
+                                {this.state.existentJuries.map(function(jury, index){
+                                    return <li className="juryLi" key={ jury.id }>
+                                        <span className="juryName" >{jury.name}</span>
+                                        <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseImagesUri + jury.name + ".jpg"} />
+                                        <div>
+                                            <a style={{display: 'inline-block'}} href="#" id={jury.id} onClick={self.juryIsjuryChanged.bind(self)}>Seleccionar para el torneo</a>
+                                            <Checky style={{display: 'inline-block'}} checked={jury.isJury} />
+                                        </div>
+
+                                    </li>;
+                                })}
+                                {enableSubirJurados && <input type="button" value="Subir jurados!" onClick={this.selectJuriesTournament.bind(this)} />}
+                            </div>}
+
                     </div>
 
                         <form className="juriesUploadContainer" onSubmit={this.subirJurados}>
+                            <h1>Subir nuevos jurados</h1>
                         Las fotos de los jurados deben tener el nombre que usaran en la aplicacion!
                         <div className="container">
                             <div>
@@ -236,7 +248,7 @@ class Juries extends Component {
                                     </li>;
                                 })}
                             </div>
-                            <input type="submit" value="Subir jurados al sistema!" />
+                            {this.state.juries.length > 0 && <input type="submit" value="Subir jurados al sistema!" />}
                         </div>
 
                         </form></div>}

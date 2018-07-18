@@ -51,20 +51,20 @@ router.route('/currentBattle')
 .post(async (req, res) => {
     await battleService.setCurrentBattle(function(){
         res.status(200).send('current battle set succesfully!');
-    }, req.body.battleId);
+    }, req.body.battleId, req.body.style, req.body.fixtureId);
 })
 
 .get(async (req, res) => {
     await battleService.getCurrentBattle(function(bt){
         res.status(200).json(bt);
-    });
+    }, req.query.style);
 });
 
 router.route('/closeBattle')
     .post(async (req, res) => {
         await battleService.closeBattle(function(){
             res.status(200).send('Batalla cerrada y guardada con exito!');
-        }, req.body.battleId);
+        }, req.body.battleId, req.body.fixtureId);
     });
 
 
@@ -74,12 +74,12 @@ router.route('/playersNames')
     .post((req, res) => {
         playersService.createPlayers(function(){
             res.status(200).send('Ok');
-        },req.body.names, req.body.style, req.body.tournamentName );
+        },req.body.names, req.body.style );
 
     })
 
     .get((req, res) => {
-        playersService.getTournamentPlayers(function(plys){
+        playersService.getPlayers(function(plys){
             res.status(200).json(plys);
         }, req.query.tourName, req.query.style);
     })
@@ -107,7 +107,7 @@ router.route('/juriesNames')
     })
 
     .get(async (req, res) => {
-        await juryService.getJuries(function(){res.send(), req.query.torneoName, req.query.style})
+        await juryService.getJuries(function(js){res.send(js)}, req.query.torneoName, req.query.style)
     })
 ;
 
@@ -142,15 +142,23 @@ router.route('/checkJuryName')
         });
     });
 
+
+router.route('/fixtures/:id').post(async (req, res) => {
+    await fixtureService.fixtureCreateBattles({callback: function(){}}, req.params.id);
+    res.status(200).send('Ok');
+})
+    .delete(async (req, res) => {
+        await fixtureService.removeFixtureBattles(function(){
+            res.status(200).send('Deleted');
+        }, req.params.id);
+    })
+;
+
 router.route('/fixtures/:tourName/:style')
     .get(async (req, res) => {
         await fixtureService.getFixture({callback: function(fx){
             res.send(fx);
         }}, req.params.tourName, req.params.style);
-    })
-    .post(async (req, res) => {
-        await fixtureService.fixtureCreateBattles({callback: function(){}}, req.params.id);
-        res.status(200).send('Ok');
     })
 ;
 
@@ -171,8 +179,7 @@ router.route('/tournaments/:name/:style')
     .post(async (req, res) => {
         await fixtureService.createInitialFixture(function(){
             res.status(200).send('Created!');
-        },req.query.name, req.query.style);
-
+        },req.params.name, req.params.style);
     });
 
 router.route('/tournaments')

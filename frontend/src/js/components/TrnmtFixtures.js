@@ -53,7 +53,7 @@ class TrnmtFixtures extends Component {
     }
 
     async eliminarFixture (ev){
-        await FixtureService.delete(ev.target.id);
+        await FixtureService.eliminarFixtureById(ev.target.id);
         //await this.getFixturesFromServer();
         window.location.reload();
     }
@@ -71,7 +71,7 @@ class TrnmtFixtures extends Component {
                             {this.state.fixtures.map(function(fixture, index){
                                 return<li className="fixtureLi" key={ index }>
                                     <span className="fixtureName" >{fixture.style}</span>
-                                    <Link className="Nav__link" to={this.props.location.pathname + '/' + fixture.style +  "/juries"} >Ir al fixture de este estilo</Link>
+                                    <Link className="Nav__link" to={self.props.location.pathname + '/' + fixture.style +  "/jurados"} >Ir al fixture de este estilo</Link>
                                     <button type='button' id={fixture.id} onClick={self.eliminarFixture.bind(self)} >Eliminar este estilo del torneo</button>
                                 </li>;
                             })}

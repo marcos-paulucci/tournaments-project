@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
-import Pusher from 'pusher-js'
-import {PUSHER_APP_KEY, baseImagesUri, baseApiUrl, puntosPorBatalla} from '../../config/frontendConfig'
+import {baseImagesUri, baseApiUrl, puntosPorBatalla} from '../../config/frontendConfig'
 import axios from 'axios';
 import PlayersService from '../services/PlayersService';
 import JuryService from '../services/JuryService';
@@ -42,7 +41,7 @@ class JuryScreen extends Component{
             });
             return;
         }
-        let response = await BattleService.getCurrentBattle(),
+        let response = await BattleService.getCurrentBattle(this.props.match.params.style),
             imgPlayer1 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw",
             imgPlayer2 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw";
         try {

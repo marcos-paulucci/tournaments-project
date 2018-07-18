@@ -4,16 +4,15 @@ import axios from "axios/index";
 
 class PlayersService {
 
-    async postPlayersNames(names, style, torneoName){
+    async postPlayersNames(names, style){
         let response = "";
         try {
             const response = await axios.post(baseApiUrl + 'playersNames', {
                 names: names,
-                style: style,
-                tournamentName: torneoName
+                style: style
             });
             if (response.status !== 200){
-                console.error("Error subiendo jugadores al torneo!" + response.message);
+                console.error("Error subiendo jugadores al sistema!" + response.message);
             }
         } catch (err){
             console.log(err);

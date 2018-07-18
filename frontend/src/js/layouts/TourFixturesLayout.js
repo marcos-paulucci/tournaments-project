@@ -3,7 +3,7 @@ import TournamentFixturesNav from '../navbars/TournamentFixturesNav'
 
 const TourFixturesLayout = props => (
     <div>
-        <h1>Main</h1>
+        <h1></h1>
         {props.children}
     </div>
 );

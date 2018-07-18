@@ -8,6 +8,11 @@ import JuryService from "../services/JuryService";
 import PlayersService from "../services/PlayersService";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 
+class Checky extends React.Component {
+    render() {
+        return (<input type="checkbox" disabled="disabled" checked={this.props.checked} />);
+    }
+}
 
 class Players extends Component {
 
@@ -16,7 +21,7 @@ class Players extends Component {
         this.state = {
             uploading: false,
             existentPlayers: [],
-            players: [{name: ''}],
+            players: [],
             tostifyAlert : false
         };
         this.subirJugadores = this.subirJugadores.bind(this);
@@ -97,6 +102,7 @@ class Players extends Component {
                     self.setState({
                         tostifyAlert : false
                     });
+                    window.location.reload();
                 }, 3000);
             }, 300);
 
@@ -134,7 +140,7 @@ class Players extends Component {
             uploading: true
         });
         try {
-            const response = PlayersService.createPlayers(this.state.players, this.props.match.params.style, this.props.match.params.torneoName)
+            const response = PlayersService.postPlayersNames(this.state.players, this.props.match.params.style);
             if (response.status !== 200){
                 console.error("Error subiendo fotos!" + response.message);
             }
@@ -146,7 +152,7 @@ class Players extends Component {
     async getPlayersFromServer() {
         let playersResponse = await PlayersService.getAllPlayers(this.props.match.params.torneoName, this.props.match.params.style);
         let serverPlayers = playersResponse.map(function(p){ return {id: p._id, name: p.name, plays: p.plays};}),
-            finalPlayers = serverPlayers.length > 0 ? serverPlayers : [{name: ""}];
+            finalPlayers = serverPlayers.length > 0 ? serverPlayers : [];
         this.setState({
             existentPlayers: finalPlayers
         });
@@ -177,7 +183,7 @@ class Players extends Component {
                 if (p.id.toString() !== id.toString()) return p;
                 // this is gonna create a new object, that has the fields from
                 // `s`, and `name` set to `newName`
-                return { ...p, plays: e.target.value };
+                return { ...p, plays: !p.plays };
             }) });
     }
 
@@ -200,6 +206,7 @@ class Players extends Component {
         let self = this;
         let isPowerOfTwo = this.powerOfTwo(this.state.players.length);
         let displayTostify = this.state.tostifyAlert ? "block" : "none";
+        let enableSubirCompetidores = this.state.existentPlayers.length > 0 && this.state.existentPlayers.filter(p => p.plays).length > 0;
         return(
             <div>
                 <ToastContainer style={{display: displayTostify,fontSize: '2em' ,height: '100%', width: '100%', textAlign: 'center', position: 'absolute', paddingTop: '5em', backgroundColor: '#bcd85f'}} />
@@ -211,23 +218,27 @@ class Players extends Component {
             </div> :
             <div>
                 <div className="existingPlayers">
+                    {this.state.existentPlayers.length === 0 ? "No hay competidores en el sistema para este estilo" :
+                        <div>
                     Competidores existentes en el sistema. Seleccionar los que participaran en este torneo para este deporte
                     {this.state.existentPlayers.map(function(player, index){
                         return <li className="playerLi" key={ player.id }>
                             <span>{player.name}</span>
                             <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
-                            <input
-                                name="Seleccionado"
-                                type="checkbox"
-                                id={player.id}
-                                checked={player.plays}
-                                onChange={self.playerPlaysChanged.bind(self)} />
+
+                            <div>
+                                <a style={{display: 'inline-block'}} href="#" id={player.id} onClick={self.playerPlaysChanged.bind(self)}>Seleccionar para el torneo</a>
+                                <Checky style={{display: 'inline-block'}} checked={player.plays} />
+                            </div>
+
                         </li>;
                     })}
-                    <input type="button" value="Subir competidores!" onClick={this.selectPlayersTournament.bind(this)}> Subir competidores!</input>
+                            <input type="button" value="Subir competidores!" onClick={this.selectPlayersTournament.bind(this)} />
+                        </div>}
                 </div>
 
                     <form className="playersUploadContainer" onSubmit={this.subirJugadores}>
+                        <h1>Subir nuevos competidores</h1>
                 Las fotos de los jurados deben tener el nombre que se mostrara para el mismo en la aplicacion!
                 <div className="container">
                     <div>
@@ -247,7 +258,7 @@ class Players extends Component {
                         })}
                     </div>
                     {isPowerOfTwo ? <input type="submit" value="Subir competidores!" /> : <span>Aun no puedes subir los competidores, deben ser potencia de 2</span>}
-                    <button type="button" value="Eliminar competidores actuales" onClick={this.eliminarCompetidores.bind(this)} >Eliminar todos los competidores del servidor</button>
+                    {this.state.existentPlayers.length > 0 &&  <button type="button" value="Eliminar competidores actuales" onClick={this.eliminarCompetidores.bind(this)} >Eliminar todos los competidores del servidor</button>}
                 </div>
             </form></div>}
             </div>

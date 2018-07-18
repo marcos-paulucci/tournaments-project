@@ -13,9 +13,9 @@ lokiDb.loadDatabase({}, function() {
 
 class BattleService {
 
-    async setCurrentBattle(callback, battleId){
+    async setCurrentBattle(callback, battleId, style, fixtureId){
         const self = this;
-        await Battle.update({},{isCurrent: false},{multi: true});
+        await Battle.update({style: style},{isCurrent: false},{multi: true});
 
         await Battle.findById(battleId, async function (err, bt) {
             if (err) {
@@ -23,8 +23,8 @@ class BattleService {
             } else if (bt) {
                 bt.isCurrent = true;
                 await bt.save(function (savedBt) { });
-                const {id, player1, player2, juryScores} = bt;
-                await self.insertInmemoActiveBattle({id, player1, player2, juryScores});
+                const {id, style, player1, player2, juryScores} = bt;
+                await self.insertInmemoActiveBattle({id, style, fixtureId, player1, player2, juryScores});
                 callback();
             } else {
                 console.log('Battle search Error: 400: not found');
@@ -32,8 +32,8 @@ class BattleService {
         });
     }
 
-    async getCurrentBattle(callback){
-        Battle.findOne({isCurrent: true}, function(err, battle) {
+    async getCurrentBattle(callback, style){
+        Battle.findOne({isCurrent: true, style: style}, function(err, battle) {
             if (err) {
                 console.log('Get current battle error : ' + err);
             } else if (battle) {
@@ -44,7 +44,7 @@ class BattleService {
         });
     }
 
-    async closeBattle(callback, battleId) {
+    async closeBattle(callback, battleId, fixtureId) {
         const self = this;
         Battle.findById(battleId, async function (err, battle) {
             if (err) {
@@ -63,7 +63,7 @@ class BattleService {
                 battle.winner = winner;
                 await battle.save(function () { });
                 await self.deleteInmemoActiveBattle(battleId);
-                await self.setPlayerNextBattle(battle.nextBattleIdFix, winner);
+                await self.setPlayerNextBattle(fixtureId, battle.nextBattleIdFix, winner);
                 callback();
             } else {
                 callback();
@@ -71,8 +71,8 @@ class BattleService {
         });
     };
 
-    async setPlayerNextBattle(nextBattleId, player) {
-        Battle.findOne({ idForFixture: nextBattleId }, async function(err, bt) {
+    async setPlayerNextBattle(fixtureId, nextBattleId, player) {
+        Battle.findOne({ fixtureId: fixtureId, idForFixture: nextBattleId }, async function(err, bt) {
             if (err) {
                 console.log('Next battle error, not found to set player: ' + err);
             } else if (bt) {
@@ -136,10 +136,10 @@ class BattleService {
         await Battle.findByIdAndRemove(battleId);
     };
 
-    async createBattle( p1, p2, isCurrent, idForFixture, nextBattleIdFix){
+    async createBattle(fixtureId, style, p1, p2, isCurrent, idForFixture, nextBattleIdFix){
         var juries = [];
         var initialJuryScores = [];
-        await Jury.find({}, function(err, js) {
+        await Jury.find({style: style}, function(err, js) {
             js.forEach(function(j) {
                 juries.push(j);
             });
@@ -161,6 +161,8 @@ class BattleService {
             idFix = idForFixture;
         }
         await Battle.create({
+            fixtureId: fixtureId,
+            style: style,
             player1: p1 ? p1 : "",
             player2: p2 ? p2 : "",
             juryScores: initialJuryScores,

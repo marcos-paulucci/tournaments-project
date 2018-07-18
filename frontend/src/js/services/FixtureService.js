@@ -12,17 +12,25 @@ class FixtureService {
         }
     };
 
-    async crearBatallasFixture(torneoName, style) {
+    async crearBatallasFixture(fixtureId) {
         try {
-            await axios.post(baseApiUrl +  'fixtures/' + torneoName + '/' + style);
+            await axios.post(baseApiUrl +  'fixtures/' + fixtureId);
         } catch (error) {
             console.error(error);
         }
     };
 
-    async eliminarFixture(style, torneoName) {
+    async eliminarBatallasFixture(fixtureId) {
         try {
-            await axios.delete(baseApiUrl +  'tournaments/'+ torneoName + '/' + style);
+            await axios.delete(baseApiUrl +  'fixtures/' + fixtureId);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    async eliminarFixture(fixtureId) {
+        try {
+            await axios.delete(baseApiUrl +  'fixtures/' + fixtureId);
         } catch (error) {
             console.error(error);
         }

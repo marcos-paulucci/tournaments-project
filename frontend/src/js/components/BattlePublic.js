@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
-import Pusher from 'pusher-js'
-import {PUSHER_APP_KEY, baseImagesUri} from '../../config/frontendConfig';
+import {baseImagesUri} from '../../config/frontendConfig';
 import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
 import AnimatedNumber from 'react-animated-number';
@@ -23,7 +22,7 @@ class BattlePublic extends Component{
     }
 
     async componentDidMount() {
-        let response = await BattleService.getCurrentBattle(),
+        let response = await BattleService.getCurrentBattle(this.props.match.params.style),
             self = this;
         this.setState({
             battleId: response._id,

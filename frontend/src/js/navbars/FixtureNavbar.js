@@ -6,18 +6,18 @@ export default class FixtureNavbar extends React.Component {
         return (
             <nav className="Nav">
                 <div className="Nav__container">
-                    <Link className="Nav__link" to="/ManagerTorneos">Volver al manager</Link>
+                    <Link className="Nav__link" to="/torneosManager">Volver al manager</Link>
 
                     <div className="Nav__right" style={{display: 'inline-block'}}>
                         <ul className="Nav__item-wrapper">
                             <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
-                                <Link className="Nav__link" to="/competidores">Competidores</Link>
+                                <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/competidores"}>Competidores</a>
                             </li>
                             <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
-                                <Link className="Nav__link" to="/jurados">Jurados</Link>
+                                <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/jurados"}>Jurados</a>
                             </li>
                             <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
-                                <Link className="Nav__link" to="/batallas">Batallas</Link>
+                                <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/fixture"}>Batallas</a>
                             </li>
                         </ul>
                     </div>

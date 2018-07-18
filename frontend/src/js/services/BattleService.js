@@ -4,18 +4,22 @@ import axios from "axios/index";
 
 class BattleService {
 
-    async setNextBattle(battleId) {
+    async setNextBattle(battleId, style, fixtureId) {
         try {
-            await axios.post(baseApiUrl +  'currentBattle', {battleId: battleId});
+            await axios.post(baseApiUrl +  'currentBattle', {battleId: battleId, style: style, fixtureId: fixtureId});
         } catch (error) {
             console.error(error);
         }
     };
 
-    async getCurrentBattle() {
+    async getCurrentBattle(style) {
         let response = "";
         try {
-            response = await axios.get(baseApiUrl +  'currentBattle');
+            response = await axios.get(baseApiUrl +  'currentBattle', {
+                params: {
+                    style
+                }
+            });
 
         } catch (error) {
             console.error(error);
@@ -46,9 +50,9 @@ class BattleService {
         return response.data;
     };
 
-    async closeBattle(battleId) {
+    async closeBattle(battleId, fixtureId) {
         try {
-            await axios.post(baseApiUrl +  'closeBattle', {battleId} );
+            await axios.post(baseApiUrl +  'closeBattle', {battleId, fixtureId} );
         } catch (error) {
             console.error(error);
         }
