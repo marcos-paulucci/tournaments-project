@@ -34,7 +34,7 @@ class JuryScreen extends Component{
     async componentDidMount() {
         let location = window.location.href,
             juryName = location.substring(location.lastIndexOf("/") + 1, location.length);
-        let isJuryNameValid = await JuryService.checkJuryName(juryName);
+        let isJuryNameValid = await JuryService.checkJuryName(juryName, this.props.match.params.style);
         if (isJuryNameValid !== 200) {
             alert("Verifique su nombre de jurado! Parece que lo ha escrito mal, o no esta cargado en el sistema");
             this.setState({

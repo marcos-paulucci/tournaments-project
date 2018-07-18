@@ -49,9 +49,9 @@ class FixtureView extends Component {
     //     return this.state.fixtureId !== nextState.fixtureId;
     // }
 
-    async crearFixture(){
+    async crearBatallasFixture(){
         try {
-            await FixtureService.createFixture();
+            await FixtureService.crearBatallasFixture(this.props.match.params.torneoName, this.props.match.params.style);
             await this.fetchFixture();
         } catch (err) {
             console.log(err);
@@ -61,7 +61,7 @@ class FixtureView extends Component {
     async borrarFixture (){
         const self = this;
         try {
-            await FixtureService.eliminarFixture(this.state.fixtureId);
+            await FixtureService.eliminarFixture(this.props.match.params.torneoName, this.props.match.params.style);
             await self.fetchFixture();
 
         } catch (err) {
@@ -132,7 +132,7 @@ class FixtureView extends Component {
         return(
             <div className="fixtureContainer" style={{width: '100%', textAlign: 'center'}}>
                 <div style={{width: '100%', textAlign: 'center'}}>
-                    {!this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearFixture.bind(this)}>Crear fixture!</button> : <span></span>}
+                    {!this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearBatallasFixture.bind(this)}>Crear fixture!</button> : <span></span>}
                     {this.state.fixtureId ? <button style={{fontSize: '2em'}} type="button" onClick={this.borrarFixture.bind(this)}>Borrar fixture</button> : <span></span>}
                 </div>
 

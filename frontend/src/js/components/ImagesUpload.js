@@ -25,7 +25,7 @@ class ImagesUpload extends Component {
             uploading: true
         });
         try {
-            const response = await axios.post('http://localhost:3000/api/upload', data);
+            const response = await axios.post(baseApiUrl + 'upload', data);
 
         } catch (err){
             console.log(err);

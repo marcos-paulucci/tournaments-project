@@ -2,6 +2,7 @@ var Battle  = require('./models/battle');
 var Player  = require('./models/player');
 var Jury  = require('./models/jury');
 var Fixture  = require('./models/fixture');
+var Tournament  = require('./models/tournament');
 var express = require('express');
 var router = express.Router();
 let multer = require('multer');
@@ -11,7 +12,9 @@ var fs = require('fs');
 const imagesPath = 'public/uploads/';
 const battleService = require('./services/battleService');
 const fixtureService = require('./services/fixtureService');
+const playersService = require('./services/playersService');
 const juryService = require('./services/juryService');
+const tournamentService = require('./services/tournamentService');
 
 router.route('/currentBattlePoints')
     .post( (req, res) => {
@@ -69,30 +72,16 @@ router.route('/closeBattle')
 
 router.route('/playersNames')
     .post((req, res) => {
+        playersService.createPlayers(function(){
+            res.status(200).send('Ok');
+        },req.body.names, req.body.style, req.body.tournamentName );
 
-
-        req.body.forEach(function(p){
-            Player.create({
-                name: p.name
-            }, function (err, player) {
-                if (err) {
-                    console.log('CREATE Error: ' + err);
-                    res.status(500).send('Error');
-                }
-            });
-        });
-        res.status(200).send('Ok');
     })
 
     .get((req, res) => {
-        Player.find({}, function(err, ps) {
-            var players = [];
-            ps.forEach(function(p) {
-                players.push(p);
-            });
-
-            res.send(players);
-        });
+        playersService.getTournamentPlayers(function(plys){
+            res.status(200).json(plys);
+        }, req.query.tourName, req.query.style);
     })
     .delete(async (req, res) => {
         Player.remove({}, function(){
@@ -103,9 +92,10 @@ router.route('/playersNames')
 router.route('/juriesNames')
     .post((req, res) => {
 
-        req.body.forEach(function(j){
+        req.body.juriesNames.forEach(function(j){
             Jury.create({
-                name: j.name
+                name: j.name,
+                style: req.body.style
             }, function (err, player) {
                 if (err) {
                     console.log('CREATE Error: ' + err);
@@ -116,27 +106,32 @@ router.route('/juriesNames')
         res.status(200).send('Ok');
     })
 
-    .get((req, res) => {
-        Jury.find({}, function(err, js) {
-            var juries = [];
-            js.forEach(function(j) {
-                juries.push(j);
-            });
-
-            res.send(juries);
-        });
+    .get(async (req, res) => {
+        await juryService.getJuries(function(){res.send(), req.query.torneoName, req.query.style})
     })
-    .delete(async (req, res) => {
-        await juryService.deleteAllJuries(function(){
-            res.status(200).send('Deleted');
-        });
+;
+
+
+router.route('/juriesForTournament')
+    .post(async (req, res) => {
+        await juryService.setJuriesForTournament(function(){
+            res.status(200).send('Ok');
+        }, req.body.tournName, req.body.style, req.body.juriesIds );
+    })
+;
+
+router.route('/playersForTournament')
+    .post(async (req, res) => {
+        await playersService.setPlayersForTournament(function(){
+            res.status(200).send('Ok');
+        }, req.body.tournName, req.body.style, req.body.playersIds );
     })
 ;
 
 router.route('/checkJuryName')
 
     .get((req, res) => {
-        Jury.findOne({name: req.query.name}, function(err, jury) {
+        Jury.findOne({name: req.query.name, style: req.query.style}, function(err, jury) {
             if (err) {
                 console.log('Jury search Error: ' + err);
             } else if (jury) {
@@ -147,16 +142,23 @@ router.route('/checkJuryName')
         });
     });
 
-router.route('/fixture')
-    .post(async (req, res) => {
-        await fixtureService.createFixture({callback: function(){}}, "breaking");
-        res.status(200).send('Ok');
-    })
-
+router.route('/fixtures/:tourName/:style')
     .get(async (req, res) => {
         await fixtureService.getFixture({callback: function(fx){
-                res.send(fx);
-            }});
+            res.send(fx);
+        }}, req.params.tourName, req.params.style);
+    })
+    .post(async (req, res) => {
+        await fixtureService.fixtureCreateBattles({callback: function(){}}, req.params.id);
+        res.status(200).send('Ok');
+    })
+;
+
+router.route('/fixtures')
+    .get(async (req, res) => {
+        await tournamentService.getTourAllFixtures(function(fxs){
+                res.send(fxs);
+            }, req.query.tournamentName);
     })
     .delete(async (req, res) => {
         await fixtureService.removeFixture(function(){
@@ -165,6 +167,26 @@ router.route('/fixture')
     })
     ;
 
+router.route('/tournaments/:name/:style')
+    .post(async (req, res) => {
+        await fixtureService.createInitialFixture(function(){
+            res.status(200).send('Created!');
+        },req.query.name, req.query.style);
+
+    });
+
+router.route('/tournaments')
+    .post(async (req, res) => {
+        await tournamentService.createTournament(req.body.name);
+        res.status(200).send('Ok');
+    })
+    .get((req, res) => {
+        tournamentService.getAllTournaments(function(trnms){res.send(trnms);});
+    })
+    .delete(async (req, res) => {
+        await tournamentService.removeTournament(req.query.name);
+        res.status(200).send('Deleted');
+    });
 
 
 module.exports = router;

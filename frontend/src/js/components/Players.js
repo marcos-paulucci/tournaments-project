@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import ReactLoading from 'react-loading';
 import axios from "axios/index";
-import PlayersService from "../services/PlayersService";
 import { ToastContainer, toast } from 'react-toastify';
 import {baseImagesUri} from "../../config/frontendConfig";
+    import {baseApiUrl} from '../../config/frontendConfig';
 import JuryService from "../services/JuryService";
+import PlayersService from "../services/PlayersService";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 
 
@@ -14,6 +15,7 @@ class Players extends Component {
         super(props);
         this.state = {
             uploading: false,
+            existentPlayers: [],
             players: [{name: ''}],
             tostifyAlert : false
         };
@@ -67,7 +69,7 @@ class Players extends Component {
             data.append('photos', files[i]);
         }
         try {
-            const response = await axios.post('http://localhost:3000/api/upload', data);
+            const response = await axios.post(baseApiUrl + 'upload', data);
         } catch (err){
             console.log(err);
         }
@@ -132,7 +134,7 @@ class Players extends Component {
             uploading: true
         });
         try {
-            const response = await axios.post('http://localhost:3000/api/playersNames', this.state.players);
+            const response = PlayersService.createPlayers(this.state.players, this.props.match.params.style, this.props.match.params.torneoName)
             if (response.status !== 200){
                 console.error("Error subiendo fotos!" + response.message);
             }
@@ -142,11 +144,11 @@ class Players extends Component {
     }
 
     async getPlayersFromServer() {
-        let playersResponse = await PlayersService.getAllPlayers();
-        let serverPlayers = playersResponse.map(function(p){ return {name: p.name};}),
+        let playersResponse = await PlayersService.getAllPlayers(this.props.match.params.torneoName, this.props.match.params.style);
+        let serverPlayers = playersResponse.map(function(p){ return {id: p._id, name: p.name, plays: p.plays};}),
             finalPlayers = serverPlayers.length > 0 ? serverPlayers : [{name: ""}];
         this.setState({
-            players: finalPlayers
+            existentPlayers: finalPlayers
         });
     }
 
@@ -168,6 +170,30 @@ class Players extends Component {
         return (Math.log(x)/Math.log(2)) % 1 === 0;
     }
 
+    playerPlaysChanged(e) {
+        e.preventDefault();
+        let id = e.target.id;
+        this.setState({ existentPlayers: this.state.existentPlayers.map((p, _idx) => {
+                if (p.id.toString() !== id.toString()) return p;
+                // this is gonna create a new object, that has the fields from
+                // `s`, and `name` set to `newName`
+                return { ...p, plays: e.target.value };
+            }) });
+    }
+
+    async selectPlayersTournament(e) {
+        try {
+            const response =  await PlayersService.setPlayersTournament(this.state.existentPlayers.filter(p => p.plays), this.props.match.params.torneoName,this.props.match.params.style);
+            if (!response || response.status !== 200){
+                console.error("Error estableciendo jugadores al fixture!" + response.message);
+            } else {
+                await this.getPlayersFromServer();
+            }
+        } catch (err){
+            console.log(err);
+        }
+    }
+
 
 
     render() {
@@ -183,7 +209,25 @@ class Players extends Component {
                     <ReactLoading type="spin" color="#fff" height={200} width={200} />
                 </div>
             </div> :
-            <form className="playersUploadContainer" onSubmit={this.subirJugadores}>
+            <div>
+                <div className="existingPlayers">
+                    Competidores existentes en el sistema. Seleccionar los que participaran en este torneo para este deporte
+                    {this.state.existentPlayers.map(function(player, index){
+                        return <li className="playerLi" key={ player.id }>
+                            <span>{player.name}</span>
+                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
+                            <input
+                                name="Seleccionado"
+                                type="checkbox"
+                                id={player.id}
+                                checked={player.plays}
+                                onChange={self.playerPlaysChanged.bind(self)} />
+                        </li>;
+                    })}
+                    <input type="button" value="Subir competidores!" onClick={this.selectPlayersTournament.bind(this)}> Subir competidores!</input>
+                </div>
+
+                    <form className="playersUploadContainer" onSubmit={this.subirJugadores}>
                 Las fotos de los jurados deben tener el nombre que se mostrara para el mismo en la aplicacion!
                 <div className="container">
                     <div>
@@ -197,7 +241,7 @@ class Players extends Component {
                         {this.state.players.map(function(player, index){
                             return <li className="playerLi" key={ index }>
                                 <span>Player # {index}</span>
-                                <input className="playerName" id={"playerName" + index}  type="text" name="playerName" value={player.name} onChange={self.playerNameChanged.bind(self)}/>
+                                <input className="playerName" disabled='disabled' id={"playerName" + index}  type="text" name="playerName" value={player.name} onChange={self.playerNameChanged.bind(self)}/>
                                 <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
                             </li>;
                         })}
@@ -205,7 +249,7 @@ class Players extends Component {
                     {isPowerOfTwo ? <input type="submit" value="Subir competidores!" /> : <span>Aun no puedes subir los competidores, deben ser potencia de 2</span>}
                     <button type="button" value="Eliminar competidores actuales" onClick={this.eliminarCompetidores.bind(this)} >Eliminar todos los competidores del servidor</button>
                 </div>
-            </form>}
+            </form></div>}
             </div>
         )
     }

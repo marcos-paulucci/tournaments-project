@@ -2,9 +2,12 @@ var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 
 var fixtureSchema = new Schema({
-    battles:     { type: Array },
+    battles:     { type: Array, default: [] },
+    players: {type: Array, default: []},
+    juries: {type: Array, default: []},
     style:     { type: String },
-    date:  { type: Date }
+    date:  { type: Date },
+    tournamentId: { type: Schema.ObjectId }
 });
 
 
