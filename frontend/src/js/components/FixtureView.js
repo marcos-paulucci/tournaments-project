@@ -32,16 +32,15 @@ class FixtureView extends Component {
     async fetchFixture() {
         let fixtureResponse = await FixtureService.getFixture(this.props.match.params.torneoName, this.props.match.params.style);
         this.setState({
-            fixtureId: fixtureResponse.id
+            fixtureId: fixtureResponse.id,
+            style: fixtureResponse.style
         });
-        if (fixtureResponse == null || fixtureResponse.battles == null || fixtureResponse.battles.length == 0 ){
-            this.initialState();
+        if (fixtureResponse.battles.length === 0 ){
             return;
         }
 
         let battles = fixtureResponse.battles.map(function(b){ return {idForFixture: b.idForFixture ,winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
         this.setState({
-            style: fixtureResponse.style,
             battles: battles
         });
     }
