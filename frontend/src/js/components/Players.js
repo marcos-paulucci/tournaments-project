@@ -274,10 +274,10 @@ class Players extends Component {
                 </div>
             </div> :
             <div>
-                <div className="existingPlayers" style={{display: 'inline-block', width: '33%', height: '100%', verticalAlign: 'top'}}>
+                <div className="existingPlayers" style={{display: 'inline-block', width: '33%', height: '100%', verticalAlign: 'top', border: '1px solid black'}}>
                     {this.state.existentPlayers.length === 0 ? "No hay competidores en el sistema para este estilo" :
                         <div>
-                        Candidatos para el torneo
+                            <h3>Candidatos</h3>
                         <ul>
                             {this.state.existentPlayers.map(function(player, index){
                                 return <li className="playerLi" key={ player.id } style={{backgroundColor: player.plays ? "yellow" : "transparent" }} >
@@ -296,10 +296,10 @@ class Players extends Component {
                     </div>}
                 </div>
 
-                <div className="topPlayers" style={{display: 'inline-block', width: '33%', height: '100%', verticalAlign: 'top'}}>
+                <div className="topPlayers" style={{display: 'inline-block', width: '40%', height: '100%', verticalAlign: 'top', border: '1px solid black'}}>
                     {this.state.topPlayers.length === 0 ? "No hay top seleccionado aun" :
                         <div>
-                            Top del torneo
+                            <h3>Top de candidatos - Arrastrar para cambiar el orden</h3>
                             <TopPlayers players={this.state.topPlayers} sendTopPlayersToServer={self.sendTopPlayersToServer.bind(self)} />
 
                         </div>}
@@ -315,7 +315,7 @@ class Players extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="playersDataContainer">
+                <div className="playersDataContainer" style={{padding: '0.5em', border: '1px solid black'}}>
                     <div className="playersAddList">
                         {this.state.players.map(function(player, index){
                             return <li className="playerLi" key={ index }>
@@ -326,7 +326,7 @@ class Players extends Component {
                         })}
                         <input type="button" value="Agregar jugador sin foto" onClick={this.addPlayerWithNoPhoto.bind(this)} />
                     </div>
-                    <input type="submit" value="Subir competidores!" /> : <span>Aun no puedes subir los competidores, deben ser potencia de 2</span>
+                    <input type="submit" value="Subir competidores!" />
                     {this.state.existentPlayers.length > 0 &&  <button type="button" value="Eliminar competidores actuales" onClick={this.eliminarCompetidores.bind(this)} >Eliminar todos los competidores del servidor</button>}
                 </div>
             </form></div>}

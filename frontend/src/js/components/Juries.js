@@ -181,13 +181,22 @@ class Juries extends Component {
     }
 
     async selectJuriesTournament(e) {
+        const self = this;
         try {
             const response =  await JuryService.setJuriesTournament(this.state.existentJuries.filter(j => j.isJury), this.props.match.params.torneoName,this.props.match.params.style);
-            if (!response || response.status !== 200){
-                console.error("Error estableciendo jurados al fixture!" + response.message);
-            } else {
-                await this.getJuriesFromServer();
-            }
+            setTimeout(function(){
+                self.setState({
+                    tostifyAlert : true
+                });
+                toast("Jurados subidos exitosamente!");
+                setTimeout(async function(){
+                    toast.dismiss();
+                    self.setState({
+                        tostifyAlert : false
+                    });
+                    await self.getJuriesFromServer();
+                }, 1500);
+            }, 300);
         } catch (err){
             console.log(err);
         }

@@ -39,8 +39,7 @@ class FixtureView extends Component {
         this.setState({
             fixtureId: fixtureResponse.id,
             style: fixtureResponse.style,
-            puntosPorBatalla: fixtureResponse.points,
-            numberJuries: fixtureResponse.juries.length
+            puntosPorBatalla: fixtureResponse.points
 
         });
         if (fixtureResponse.battles.length === 0 ){
