@@ -4,6 +4,7 @@ import {baseImagesUri} from '../../config/frontendConfig';
 import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
 import AnimatedNumber from 'react-animated-number';
+import FixtureService from "../services/FixtureService";
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 class BattlePublic extends Component{

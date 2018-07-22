@@ -22,27 +22,35 @@ class JuryService {
     }
 
     async setJuriesForTournament(callback, tournName, style, juriesIds){
-        let fx = await TournamentsService.getTourFixture(tournName, style);
-        fx.juries = juriesIds;
-        fx.save(function (err, updatedFx) {
-            if (err) {
-                console.log("Error updating fixture ", err);
-            }
-            callback(updatedFx);
+        let fx;
+        await TournamentsService.getTourFixture(tournName, style, function(fxt){
+            fx = fxt;
+            fx.juries = juriesIds;
+            fx.save(function (err, updatedFx) {
+                if (err) {
+                    console.log("Error updating fixture ", err);
+                }
+                callback(updatedFx);
+            });
         });
+
     }
 
     async getJuries(callback, torneoName, style){
-        let fxt = await TournamentsService.getTourFixture(torneoName, style);
-
-        await Jury.find({style: style}, function(err, js) {
-            var juries = [];
-            js.forEach(function(j) {
-                j.isJury = fxt.juries.indexOf(j._id) >= 0;
-                juries.push({name: j.name, _id: j._id, isJury: j.isJury});
+        let fxt;
+        await TournamentsService.getTourFixture(torneoName, style, async function(fx){
+            fxt = fx;
+            await Jury.find({style: style}, function(err, js) {
+                var juries = [];
+                js.forEach(function(j) {
+                    j.isJury = fxt.juries.indexOf(j._id) >= 0;
+                    juries.push({name: j.name, _id: j._id, isJury: j.isJury});
+                });
+                callback(juries);
             });
-            callback(juries);
         });
+
+
     };
 
 }

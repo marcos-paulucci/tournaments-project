@@ -4,9 +4,12 @@ import axios from "axios/index";
 
 class FixtureService {
 
-    async createFixture(style, torneoName) {
+    async createFixture(style, torneoName, top, points) {
         try {
-            await axios.post(baseApiUrl +  'tournaments/'+ torneoName + '/' + style);
+            await axios.post(baseApiUrl +  'tournaments/'+ torneoName + '/' + style, {
+                top,
+                points
+            });
         } catch (error) {
             console.error(error);
         }

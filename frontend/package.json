@@ -28,6 +28,7 @@
     "react-pusher": "^0.2.0",
     "react-responsive": "^4.0.3",
     "react-router-dom": "^4.1.2",
+    "react-sortable-hoc": "^0.8.3",
     "react-spinkit": "^3.0.0",
     "react-toastify": "^4.1.0",
     "redbird": "^0.7.0",

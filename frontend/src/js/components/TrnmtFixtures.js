@@ -8,13 +8,20 @@ class TrnmtFixtures extends Component {
         super(props);
         this.state = {
             fixtures: [],
-            newStyle: ''
+            newStyle: '',
+            newTop: '',
+            newPoints: ''
         };
     }
 
     async createFixture(ev) {
         ev.preventDefault();
         const self = this;
+        if (this.state.newStyle.length === 0 || this.state.newTop <= 0 || this.state.newPoints <= 0 ){
+            alert("Debe usar un nombre correcto y numeros validos");
+            return;
+        }
+
         try {
             let exists = await FixtureService.checkExistingStyle(this.props.match.params.torneoName, this.state.newStyle);
             if (exists){
@@ -22,9 +29,11 @@ class TrnmtFixtures extends Component {
                 return;
             }
 
-            await FixtureService.createFixture(this.state.newStyle, this.props.match.params.torneoName);
+            await FixtureService.createFixture(this.state.newStyle, this.props.match.params.torneoName, this.state.newTop, this.state.newPoints);
             this.setState({
-                newStyle: ''
+                newStyle: '',
+                newTop: '',
+                newPoints: ''
             });
             await this.getFixturesFromServer();
         } catch (err){
@@ -39,8 +48,22 @@ class TrnmtFixtures extends Component {
         });
     }
 
+    fixtureTopChanged(e) {
+        this.setState({
+            newTop: e.target.value.replace(/\D/g,'')
+        });
+    }
+
+    fixturePointsChanged(e) {
+        this.setState({
+            newPoints: e.target.value.replace(/\D/g,'')
+        });
+    }
+
     async getFixturesFromServer() {
         let fixturesResponse = await FixtureService.getAllTournamentFixtures(this.props.match.params.torneoName);
+        if (!fixturesResponse || fixturesResponse.length === 0)
+            return;
         let serverfixtures = fixturesResponse.map(function(f){ return {id: f._id, style: f.style};}),
             finalFixtures = serverfixtures.length > 0 ? serverfixtures : [];
         this.setState({
@@ -78,7 +101,9 @@ class TrnmtFixtures extends Component {
                         </div>
                         <div className="fixtureDataSection">
                             <span>Agregar estilo:</span>
-                            <input className="fixtureAddName" type="text" name="fixtureAddName" value={this.state.newStyle} onChange={self.fixtureStyleChanged.bind(self)}/>
+                            <input style={{display: 'block'}} placeholder="nombre del estilo" className="fixtureAddName" type="text" name="fixtureAddName" value={this.state.newStyle} onChange={self.fixtureStyleChanged.bind(self)}/>
+                            <input style={{display: 'block'}} placeholder="cantidad players top" className="fixtureAddTop" type="text" name="fixtureAddTop" value={this.state.newTop} onChange={self.fixtureTopChanged.bind(self)}/>
+                            <input style={{display: 'block'}} placeholder="puntaje jurado" type="text" name="fixtureAddPoints" value={this.state.newPoints} onChange={self.fixturePointsChanged.bind(self)}/>
                         </div>
                         <button type='button' onClick={self.createFixture.bind(self)}>Agregar este estilo al torneo</button>
                     </div>

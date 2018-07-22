@@ -105,7 +105,7 @@ class Juries extends Component {
                     self.setState({
                         tostifyAlert : false
                     });
-                }, 3000);
+                }, 1500);
             }, 300);
 
         } catch (err){

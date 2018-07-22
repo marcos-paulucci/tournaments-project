@@ -53,24 +53,33 @@ class TournamentService {
         await Tournament.findByIdAndRemove(tournament._id);
     }
 
-    async getTournamentByName(name){
+    async getTournamentByName(name, callback){
         let tournament;
         await Tournament.findOne({'name': name}, async function(err, trn) {
-            tournament = trn;
+            callback(trn);
         });
-        return tournament;''
     }
 
-    async getTourFixture(tournName, style){
-        let tournament = await this.getTournamentByName(tournName);
-        let fixtures = await FixtureService.getTournamentFixtures(tournament._id);
-        let fixture = fixtures.find(f => f.style === style);
-        return fixture;
+    async getTourFixture(tournName, style, callback){
+        let tournament;
+        await this.getTournamentByName(tournName, async function(trn){
+            tournament = trn;
+            let fixtures;
+            await FixtureService.getTournamentFixtures(tournament._id, function(fxts){
+                fixtures = fxts;
+                let fixture = fixtures.find(f => f.style === style);
+                callback(fixture);
+            });
+
+        });
+
     }
 
     async getTourAllFixtures(callback, tournName){
-        let tournament = await this.getTournamentByName(tournName);
-        let fixtures = await FixtureService.getTournamentFixtures(tournament._id);
+        let tournament;
+        await this.getTournamentByName(tournName, function(trn){tournament = trn;});
+        let fixtures;
+        await FixtureService.getTournamentFixtures(tournament._id, function(fxts){fixtures = fxts;});
         if (callback)
             callback(fixtures);
         return fixtures;

@@ -1,4 +1,5 @@
 var Battle  = require('../models/battle');
+var Fixture  = require('../models/fixture');
 var loki = require('lokijs');
 var lokiDb = new loki('lokiInMemoryDb.db');
 var currentBattlesInMemo;
@@ -44,6 +45,34 @@ class BattleService {
         });
     }
 
+    async closeDummiesBattles(fixtureId) {
+        const self = this;
+        let fxt = null;
+        Battle.find({ fixtureId: fixtureId}, async function(err, bts) {
+            if (err) {
+                console.log('Dummy battles search error: ' + err);
+            } else {
+                bts.forEach(async function(bt){
+                    if (!bt.winner && (bt.player1 === "dummy" || bt.player2 === "dummy") ){
+                        let winner = null;
+                        if (bt.player1 === "dummy"){
+                            bt.winner = bt.player2;
+                            winner = bt.player2;
+                        }
+                        if (bt.player2 === "dummy"){
+                            bt.winner = bt.player1;
+                            winner = bt.player1;
+                        }
+                        await bt.save(function () { });
+                        await self.setPlayerNextBattle(fixtureId, bt.nextBattleIdFix, winner);
+                    }
+                });
+
+            }
+        });
+    };
+
+
     async closeBattle(callback, battleId, fixtureId) {
         const self = this;
         Battle.findById(battleId, async function (err, battle) {
@@ -61,10 +90,22 @@ class BattleService {
                 battle.juryScores = battleInMemory.juryScores;
                 battle.isCurrent = false;
                 battle.winner = winner;
+
                 await battle.save(function () { });
                 await self.deleteInmemoActiveBattle(battleId);
                 await self.setPlayerNextBattle(fixtureId, battle.nextBattleIdFix, winner);
-                callback();
+                await self.closeDummiesBattles(fixtureId);
+                const currentBattleIdFix = battle.idForFixture;
+                await Battle.findOne({ fixtureId: fixtureId, idForFixture: currentBattleIdFix + 1 }, async function(err, bt) {
+                    if (err) {
+                        console.log('Next battle error, not found to set current: ' + err);
+                    } else if (bt) {
+                        await self.setCurrentBattle(callback, bt._id, bt.style, fixtureId)
+                    } else {
+                        console.log('Next battle not found! : ' + err);
+                        callback();
+                    }
+                });
             } else {
                 callback();
             }
@@ -72,16 +113,22 @@ class BattleService {
     };
 
     async setPlayerNextBattle(fixtureId, nextBattleId, player) {
+        const self = this;
         Battle.findOne({ fixtureId: fixtureId, idForFixture: nextBattleId }, async function(err, bt) {
             if (err) {
                 console.log('Next battle error, not found to set player: ' + err);
             } else if (bt) {
-                if (bt.player1 === null || bt.player1 === undefined || bt.player1 === ""){
-                    bt.player1 = player
+                if (bt.winner !== null && bt.winner !== undefined && bt.winner !== ""){
+                    await self.setPlayerNextBattle(fixtureId, nextBattleId + 1, player);
                 } else {
-                    bt.player2 = player
+                    if (bt.player1 === null || bt.player1 === undefined || bt.player1 === ""){
+                        bt.player1 = player
+                    } else {
+                        bt.player2 = player
+                    }
+                    await bt.save(function () { });
                 }
-                await bt.save(function () { });
+
             } else {
                 console.log('Next battle not found! : ' + err);
             }
@@ -136,47 +183,102 @@ class BattleService {
         await Battle.findByIdAndRemove(battleId);
     };
 
-    async createBattle(fixtureId, style, p1, p2, isCurrent, idForFixture, nextBattleIdFix){
-        var juries = [];
-        var initialJuryScores = [];
-        await Jury.find({style: style}, function(err, js) {
-            js.forEach(function(j) {
-                juries.push(j);
-            });
-            initialJuryScores = juries.map(function(j){
-                return {
-                    name: j.name,
-                    p1: 0,
-                    p2: 0
-                }
-            });
-        });
-        let createdBattleId = null;
-        let curr = false,
-            idFix = false;
-        if (isCurrent !== null && isCurrent !== undefined){
-            curr = isCurrent;
-        }
-        if (idForFixture!== null && idForFixture !== undefined){
-            idFix = idForFixture;
-        }
-        await Battle.create({
-            fixtureId: fixtureId,
-            style: style,
-            player1: p1 ? p1 : "",
-            player2: p2 ? p2 : "",
-            juryScores: initialJuryScores,
-            isCurrent: curr,
-            idForFixture: idFix,
-            nextBattleIdFix: nextBattleIdFix
-        }, function (err, battle) {
+    async createAllBattles(fixtureId, style, allBattles, callback){
+        var juries = [],
+            initialJuryScores = [],
+            fixture;
+        await Fixture.findById(fixtureId, async function (err, fxt) {
             if (err) {
-                console.log('CREATE Error: ' + err);
-            } else {
-                createdBattleId = battle._id;
+                console.log("Error searching fixture by id", err);
             }
+            fixture = fxt;
+            const myCllback = callback;
+            await Jury.find({style: style, '_id': { $in: fixture.juries}}, async function(err, js) {
+                js.forEach(function(j) {
+                    juries.push(j);
+                });
+                initialJuryScores = juries.map(function(j){
+                    return {
+                        name: j.name,
+                        p1: 0,
+                        p2: 0
+                    }
+                });
+                let finalBattles = allBattles.map(function(b) {
+                    return {
+                        fixtureId: b.fixtureId,
+                        style: style,
+                        player1: b.player1,
+                        player2: b.player2,
+                        juryScores: initialJuryScores,
+                        isCurrent: b.isCurrent,
+                        idForFixture: b.idForFixture,
+                        nextBattleIdFix: b.nextBattleIdFix
+                    }
+                });
+                await Battle.create(finalBattles, function (err, battles) {
+                    if (err) {
+                        console.log('CREATE Error: ' + err);
+                    } else {
+                        myCllback(battles.map(b => b._id));
+                    }
+                });
+
+            });
         });
-        return createdBattleId;
+    }
+
+    async createBattle(fixtureId, style, p1, p2, isCurrent, idForFixture, nextBattleIdFix, callback){
+        var juries = [],
+            initialJuryScores = [],
+            fixture;
+        await Fixture.findById(fixtureId, async function (err, fxt) {
+            if (err) {
+                console.log("Error searching fixture by id", err);
+            }
+            fixture = fxt;
+            const myCllback = callback;
+            await Jury.find({style: style, '_id': { $in: fixture.juries}}, async function(err, js) {
+                js.forEach(function(j) {
+                    juries.push(j);
+                });
+                initialJuryScores = juries.map(function(j){
+                    return {
+                        name: j.name,
+                        p1: 0,
+                        p2: 0
+                    }
+                });
+                let createdBattleId = null;
+                let curr = false,
+                    idFix = false;
+                if (isCurrent !== null && isCurrent !== undefined){
+                    curr = isCurrent;
+                }
+                if (idForFixture!== null && idForFixture !== undefined){
+                    idFix = idForFixture;
+                }
+
+                await Battle.create({
+                    fixtureId: fixtureId,
+                    style: style,
+                    player1: p1 ? p1 : "",
+                    player2: p2 ? p2 : "",
+                    juryScores: initialJuryScores,
+                    isCurrent: curr,
+                    idForFixture: idFix,
+                    nextBattleIdFix: nextBattleIdFix
+                }, function (err, battle) {
+                    if (err) {
+                        console.log('CREATE Error: ' + err);
+                    } else {
+                        createdBattleId = battle._id;
+                        myCllback(createdBattleId);
+                    }
+                });
+
+            });
+        });
     }
 }
 

@@ -8,15 +8,15 @@ export default class FixtureNavbar extends React.Component {
                 <div className="Nav__container">
                     <Link className="Nav__link" to="/torneosManager">Volver al manager</Link>
 
-                    <div className="Nav__right" style={{display: 'inline-block'}}>
+                    <div className="Nav__right" style={{display: 'inline-block', width: '80%'}}>
                         <ul className="Nav__item-wrapper">
-                            <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
+                            <li className="Nav__item" style={{display: 'inline-block', width: '25%', border: '1px solid black', textAlign: 'center'}}>
                                 <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/competidores"}>Competidores</a>
                             </li>
-                            <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
+                            <li className="Nav__item" style={{display: 'inline-block', width: '25%', border: '1px solid black', textAlign: 'center'}}>
                                 <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/jurados"}>Jurados</a>
                             </li>
-                            <li className="Nav__item" style={{display: 'inline-block', width: '8em'}}>
+                            <li className="Nav__item" style={{display: 'inline-block', width: '25%', border: '1px solid black', textAlign: 'center'}}>
                                 <a href={window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/fixture"}>Batallas</a>
                             </li>
                         </ul>

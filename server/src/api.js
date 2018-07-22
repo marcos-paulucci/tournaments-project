@@ -30,14 +30,18 @@ router.route('/currentBattlePoints')
         }, req.query.id);
     });
 
-router.post('/upload', upload.array('photos',16), (req, res, next) => {
+router.post('/upload', upload.array('photos',32), (req, res, next) => {
 
-    var files = req.files;
+    var files = req.files,
+        names;
+    if (req.body.names)
+        names = req.body.names.split(',');
+    else
+        names = files.map(function(file){ return file.originalname.substring(0, file.originalname.lastIndexOf("."))});
     for (var i = 0; i < files.length; i++){
-        var file = files[i];
-        var nameLastDot = file.originalname.lastIndexOf("."),
-            nameWithJpgName =  file.originalname.substring(0, nameLastDot);
-        var target_path = imagesPath + nameWithJpgName + ".jpg";
+        var file = files[i],
+            name = names[i];
+        var target_path = imagesPath + name + ".jpg";
         fs.writeFile(target_path, file.buffer);
     }
     res.status(200).send('subido exitosamente!');
@@ -74,12 +78,12 @@ router.route('/playersNames')
     .post((req, res) => {
         playersService.createPlayers(function(){
             res.status(200).send('Ok');
-        },req.body.names, req.body.style );
+        },req.body.names, req.body.style, req.body.tourName );
 
     })
 
     .get((req, res) => {
-        playersService.getPlayers(function(plys){
+        playersService.getTournamentPlayers(function(plys){
             res.status(200).json(plys);
         }, req.query.tourName, req.query.style);
     })
@@ -88,6 +92,13 @@ router.route('/playersNames')
             res.status(200).send('Deleted');
         });
     });
+router.route('/playingPlayers')
+    .get((req, res) => {
+        playersService.getTopTournamentPlayers(function(plys){
+            res.status(200).json(plys);
+        }, req.query.tourName, req.query.style);
+    });
+
 
 router.route('/juriesNames')
     .post((req, res) => {
@@ -122,7 +133,7 @@ router.route('/juriesForTournament')
 
 router.route('/playersForTournament')
     .post(async (req, res) => {
-        await playersService.setPlayersForTournament(function(){
+        await playersService.setTopPlayersForTournament(function(){
             res.status(200).send('Ok');
         }, req.body.tournName, req.body.style, req.body.playersIds );
     })
@@ -177,9 +188,10 @@ router.route('/fixtures')
 
 router.route('/tournaments/:name/:style')
     .post(async (req, res) => {
+        //ver si TOP llega!
         await fixtureService.createInitialFixture(function(){
             res.status(200).send('Created!');
-        },req.params.name, req.params.style);
+        },req.params.name, req.params.style, req.body.top, req.body.points);
     });
 
 router.route('/tournaments')

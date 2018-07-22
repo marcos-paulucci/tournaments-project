@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 import FixtureService from "../services/FixtureService";
 import BattleService from "../services/BattleService";
 import {getLevel, getLevelsRange} from "../services/fixtureUtilities";
-
+import {baseImagesUri} from "../../config/frontendConfig";
+const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 class FixtureView extends Component {
 
     initialState(){
         this.setState({
             fixtureId: null,
             style: "",
-            battles: []
+            battles: [],
+            puntosPorBatalla: 0,
+            numberJuries: 0
         });
     }
     constructor(props) {
@@ -20,7 +23,9 @@ class FixtureView extends Component {
 
         this.state = {
             style: "",
-            battles: []
+            battles: [],
+            puntosPorBatalla: 0,
+            numberJuries: 0
         };
     }
 
@@ -33,7 +38,10 @@ class FixtureView extends Component {
         let fixtureResponse = await FixtureService.getFixture(this.props.match.params.torneoName, this.props.match.params.style);
         this.setState({
             fixtureId: fixtureResponse.id,
-            style: fixtureResponse.style
+            style: fixtureResponse.style,
+            puntosPorBatalla: fixtureResponse.points,
+            numberJuries: fixtureResponse.juries.length
+
         });
         if (fixtureResponse.battles.length === 0 ){
             return;
@@ -82,7 +90,6 @@ class FixtureView extends Component {
     async closeBattle(e) {
         let battleId = e.target.id.split(".")[0];
         try {
-            debugger;
             await BattleService.closeBattle(battleId, this.state.fixtureId);
             await this.fetchFixture();
         } catch (err){
@@ -123,6 +130,10 @@ class FixtureView extends Component {
             });
     }
 
+    fixPlayerBrokenImgSrc(target) {
+        target.target.src = playerDefaultImg;
+    }
+
 
 
 
@@ -133,8 +144,7 @@ class FixtureView extends Component {
         return(
             <div className="fixtureContainer" style={{width: '100%', textAlign: 'center'}}>
                 <div style={{width: '100%', textAlign: 'center'}}>
-                    {this.state.battles.length ===  0 ? <button style={{fontSize: '2em'}} type="button" onClick={this.crearBatallasFixture.bind(this)}>Crear fixture!</button> : <span></span>}
-                    {this.state.battles.length > 0 ? <button style={{fontSize: '2em'}} type="button" onClick={this.borrarFixture.bind(this)}>Resetear batallas del fixture</button> : <span></span>}
+                    <button style={{fontSize: '2em'}} type="button" onClick={this.crearBatallasFixture.bind(this)}>Crear/Recrear fixture!</button>
                 </div>
 
                 <div className="battlesList" style={{width: '100%', textAlign: 'center', padding: '1em'}}>
@@ -143,19 +153,21 @@ class FixtureView extends Component {
                             <div style={{fontSize: '2em' }}>{lvl.levelName}</div>
                             <ul>
                             {lvl.battles.map(function(battle, index){
-                                return <li className="battleLi" style={{width: '100%', height: '7em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
+                                return <li className="battleLi" style={{width: '100%', height: '10em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
                                     <div style={{width: '80%', margin: 'auto' }}>
                                         <div style={{float: 'left', width: '60%' }}>
                                             <div>Battle # {battle.idForFixture}</div>
                                             <div>Competidor 1: {battle.p1}</div>
+                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + battle.p1 + ".jpg"} />
                                             <div>Competidor 2: {battle.p2}</div>
+                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + battle.p2 + ".jpg"} />
                                             {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
                                         </div>
 
                                         <div className="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>
                                             {battle.isCurrent ? <div><div style={{fontSize: '1.2em' }}>Esta es la proxima batalla!</div>
                                                 <button style={{fontSize: '1.2em' }} type="button" id={battle.battleId + '.Close'} onClick={self.closeBattle.bind(self)}> Terminar batalla</button></div>  : ""}
-                                            {battle.winner === "" && battle.p1 !== "" ? <button type="button" style={{fontSize: '1.2em' }} id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
+                                            {battle.winner === "" && battle.p1 !== "" && battle.p2 !== ""  && (!battle.isCurrent)? <button type="button" style={{fontSize: '1.2em' }} id={battle.battleId} onClick={self.setCurrentBattle.bind(self)}> Marcar como proxima batalla!</button> : ""}
                                         </div>
                                     </div>
                                 </li>;

@@ -4,12 +4,13 @@ import axios from "axios/index";
 
 class PlayersService {
 
-    async postPlayersNames(names, style){
+    async postPlayersNames(names, style, tourName){
         let response = "";
         try {
             const response = await axios.post(baseApiUrl + 'playersNames', {
                 names: names,
-                style: style
+                style: style,
+                tourName: tourName
             });
             if (response.status !== 200){
                 console.error("Error subiendo jugadores al sistema!" + response.message);
@@ -62,6 +63,22 @@ class PlayersService {
             console.log(err);
         }
         return response.status;
+    };
+
+    async getTopPlayers(tournamentName, style) {
+        let response = "";
+        try {
+            response = await axios.get(baseApiUrl +  'playingPlayers', {
+                params: {
+                    tourName: tournamentName,
+                    style: style
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+        return response.data;
     };
 
 
