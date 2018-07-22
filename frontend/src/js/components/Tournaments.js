@@ -69,16 +69,17 @@ class Tournaments extends Component {
                         <div className="tournamentsList">
                             {this.state.tournaments.map(function(tournament, index){
                                 return<li className="tournamentLi" key={ index }>
-                                    <span className="tournamentName" >{tournament.name}</span>
-                                    <Link className="Nav__link" to={"/torneos/" + tournament.name} >Ir a los fixtures fixture de este torneo</Link>
+                                    <span style={{marginRight: '1em', fontSize: '2em' , textAlign: 'center'}} className="tournamentName" >{tournament.name}</span>
+                                    <Link style={{fontSize: '2em' , textAlign: 'center', border: '1px solid black', borderRadius: '10px', backgroundColor: 'white'}} className="Nav__link" to={"/torneos/" + tournament.name} > Ir a los fixtures fixture de este torneo</Link>
                                 </li>;
                             })}
                         </div>
-                        <div className="tournamentDataSection">
+                        <div className="tournamentDataSection" style={{marginTop: '1em', fontSize: '2em' , textAlign: 'center'}}>
                             <span>Agregar torneo:</span>
-                            <input className="tournamentAddName" type="text" name="tournamentAddName" value={this.state.newTournament} onChange={self.tournamentNameChanged.bind(self)}/>
+                            <input className="tournamentAddName" style={{fontSize: '1.1em'}} type="text" name="tournamentAddName" value={this.state.newTournament} onChange={self.tournamentNameChanged.bind(self)}/>
+                            <button type='button' style={{fontSize: '1.1em', textAlign: 'center', border: '1px solid black', borderRadius: '10px', backgroundColor: 'white'}}  onClick={self.uploadTournament.bind(self)}>Crear torneo!</button>
                         </div>
-                        <button type='button' onClick={self.uploadTournament.bind(self)}>Crear torneo!</button>
+
                     </div>
                 </div>
             </div>

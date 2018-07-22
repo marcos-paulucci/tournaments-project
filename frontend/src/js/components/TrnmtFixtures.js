@@ -86,26 +86,27 @@ class TrnmtFixtures extends Component {
         const self = this;
         return(
             <div>
-                <div className="fixturesUploadContainer">
+                <div className="fixturesUploadContainer" style={{marginLeft: '1em', textAlign: 'center'}}>
                     <h1>Torneo: {this.props.match.params.torneoName}</h1>
-                    Estilos
+                    <h3>Deportes de este torneo</h3>
                     <div className="fixturesDataContainer">
                         <div className="fixturesList">
                             {this.state.fixtures.map(function(fixture, index){
-                                return<li className="fixtureLi" key={ index }>
-                                    <span className="fixtureName" >{fixture.style}</span>
-                                    <Link className="Nav__link" to={self.props.location.pathname + '/' + fixture.style +  "/jurados"} >Ir al fixture de este estilo</Link>
+                                return<li className="fixtureLi" key={ index } style={{width: '40%', margin: 'auto', fontSize: '1.4em' , textAlign: 'center', border: '1px solid black'}}>
+                                    <span style={{marginRight: '1em', textAlign: 'center'}} className="fixtureName" >{fixture.style}</span>
+                                    <Link style={{marginRight: '1em', textAlign: 'center', border: '1px solid black', borderRadius: '10px', backgroundColor: 'white'}} className="Nav__link" to={self.props.location.pathname + '/' + fixture.style +  "/jurados"} >Ir al fixture de este estilo</Link>
                                     <button type='button' id={fixture.id} onClick={self.eliminarFixture.bind(self)} >Eliminar este estilo del torneo</button>
                                 </li>;
                             })}
                         </div>
-                        <div className="fixtureDataSection">
-                            <span>Agregar estilo:</span>
-                            <input style={{display: 'block'}} placeholder="nombre del estilo" className="fixtureAddName" type="text" name="fixtureAddName" value={this.state.newStyle} onChange={self.fixtureStyleChanged.bind(self)}/>
-                            <input style={{display: 'block'}} placeholder="cantidad players top" className="fixtureAddTop" type="text" name="fixtureAddTop" value={this.state.newTop} onChange={self.fixtureTopChanged.bind(self)}/>
-                            <input style={{display: 'block'}} placeholder="puntaje jurado" type="text" name="fixtureAddPoints" value={this.state.newPoints} onChange={self.fixturePointsChanged.bind(self)}/>
+                        <div className="fixtureDataSection" style={{fontSize: '1.4em' , textAlign: 'center'}}>
+                            <h4>Agregar otro estilo:</h4>
+                            <input style={{width: '40%', margin: 'auto', textAlign: 'center', display: 'block'}} placeholder="nombre del estilo" className="fixtureAddName" type="text" name="fixtureAddName" value={this.state.newStyle} onChange={self.fixtureStyleChanged.bind(self)}/>
+                            <input style={{width: '40%', margin: 'auto',textAlign: 'center', display: 'block'}} placeholder="cantidad players top" className="fixtureAddTop" type="text" name="fixtureAddTop" value={this.state.newTop} onChange={self.fixtureTopChanged.bind(self)}/>
+                            <input style={{width: '40%', margin: 'auto',textAlign: 'center' , display: 'block'}} placeholder="puntaje jurado" type="text" name="fixtureAddPoints" value={this.state.newPoints} onChange={self.fixturePointsChanged.bind(self)}/>
+                            <button type='button' style={{fontSize: '1.4em' , textAlign: 'center'}} onClick={self.createFixture.bind(self)}>Agregar este estilo al torneo</button>
                         </div>
-                        <button type='button' onClick={self.createFixture.bind(self)}>Agregar este estilo al torneo</button>
+
                     </div>
                 </div>
             </div>
