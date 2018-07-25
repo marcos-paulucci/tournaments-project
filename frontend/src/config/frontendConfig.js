@@ -1,2 +1,2 @@
-export const baseImagesUri = "/uploads/";
+export const baseFilesUri = "/uploads/";
 export const baseApiUrl = "/api/";

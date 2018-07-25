@@ -9,7 +9,7 @@ let multer = require('multer');
 let upload = multer();
 var path = require('path');
 var fs = require('fs');
-const imagesPath = 'public/uploads/';
+const filesPath = 'public/uploads/';
 const battleService = require('./services/battleService');
 const fixtureService = require('./services/fixtureService');
 const playersService = require('./services/playersService');
@@ -41,7 +41,7 @@ router.post('/upload', upload.array('photos',32), (req, res, next) => {
     for (var i = 0; i < files.length; i++){
         var file = files[i],
             name = names[i];
-        var target_path = imagesPath + name + ".jpg";
+        var target_path = filesPath + name + ".jpg";
         fs.writeFile(target_path, file.buffer);
     }
     res.status(200).send('subido exitosamente!');
@@ -205,6 +205,12 @@ router.route('/tournaments')
     .delete(async (req, res) => {
         await tournamentService.removeTournament(req.query.name);
         res.status(200).send('Deleted');
+    });
+
+router.route('/battlesExport')
+
+    .get(async (req, res) => {
+        await fixtureService.exportFixture(function(fileName){res.send(fileName);}, req.query.tourName, req.query.style );
     });
 
 

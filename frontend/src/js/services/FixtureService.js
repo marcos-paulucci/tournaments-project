@@ -83,6 +83,14 @@ class FixtureService {
         return response.data;
     };
 
+    async getExport(tournamentName, style){
+        let fileName = await axios.get(baseApiUrl +  'battlesExport', {params: {
+            tourName: tournamentName,
+            style: style
+        }});
+        return fileName;
+    }
+
 }
 
 let fixtureService = new FixtureService();

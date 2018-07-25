@@ -45,8 +45,9 @@ mongoose.connect('mongodb://localhost/tournament');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection Error:'));
 db.once('open', function () {
-  app.listen(3000, function () {
-    console.log('Node server running on port 3000');
+    let port = 3005;
+  app.listen(port, function () {
+    console.log('Node server running on port ' + port);
   });
 });
 

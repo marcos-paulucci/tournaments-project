@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactLoading from 'react-loading';
 import axios from "axios/index";
 import { ToastContainer, toast } from 'react-toastify';
-import {baseImagesUri} from "../../config/frontendConfig";
+import {baseFilesUri} from "../../config/frontendConfig";
 import {baseApiUrl} from '../../config/frontendConfig';
 import TopPlayers from './TopPlayers';
 import JuryService from "../services/JuryService";
@@ -282,7 +282,7 @@ class Players extends Component {
                             {this.state.existentPlayers.map(function(player, index){
                                 return <li className="playerLi" key={ player.id } style={{backgroundColor: player.plays ? "yellow" : "transparent" }} >
                                     <span>{player.name}</span>
-                                    <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
+                                    <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + player.name + ".jpg"} />
                                     <input ref={(ref) => { self.changeExistingPhoto = ref; }} id={"playerId--" + player.id} className="form-control"  type="file" name="photos" onChange={self.changeExistingPhoto} />
                                     <div>
                                         <a style={{display: 'inline-block'}} href="#" id={player.id} onClick={self.playerPlaysChanged.bind(self)}>Seleccionar para el torneo</a>
@@ -321,7 +321,7 @@ class Players extends Component {
                             return <li className="playerLi" key={ index }>
                                 <span>Player # {index}</span>
                                 <input className="playerName" id={"playerName" + index}  type="text" name="playerName" value={player.name} onChange={self.playerNameChanged.bind(self)}/>
-                                <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + player.name + ".jpg"} />
+                                <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + player.name + ".jpg"} />
                             </li>;
                         })}
                         <input type="button" value="Agregar jugador sin foto" onClick={this.addPlayerWithNoPhoto.bind(this)} />

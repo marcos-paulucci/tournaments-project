@@ -1,6 +1,6 @@
 var Jury  = require('../models/jury');
 var TournamentsService  = require('./tournamentService');
-const imagesPath = 'public/uploads/';
+const filesPath = 'public/uploads/';
 var fs = require('fs');
 
 class JuryService {

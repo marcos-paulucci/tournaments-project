@@ -1,7 +1,7 @@
 var Player  = require('../models/player');
 var TournamentsService  = require('./tournamentService');
 var FixtureService  = require('./fixtureService');
-const imagesPath = 'public/uploads/';
+const filesPath = 'public/uploads/';
 var fs = require('fs');
 
 class PlayersService {

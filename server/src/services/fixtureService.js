@@ -4,6 +4,7 @@ var Fixture  = require('../models/fixture');
 var Jury  = require('../models/jury');
 var TournamentsService  = require('./tournamentService');
 var BattleService  = require('./battleService');
+var xlsService  = require('./xlsService');
 var nextBattleCalculator = require('./nextBattleCalculator');
 class FixtureService {
 
@@ -136,6 +137,60 @@ class FixtureService {
                 points: fx.points,
                 juries: fx.juries
             });
+        });
+
+    };
+
+    async exportFixture(cli, tourName, style) {
+        var battlesArr = [];
+        let fx;
+        await TournamentsService.getTourFixture(tourName, style, async function(fxt){
+            fx = fxt;
+            for (let i = 0; i < fx.battles.length; i++){
+                await Battle.findById(fx.battles[i], function (err, bt) {
+                    if (err) {
+                        console.log('Battle search Error: ' + err);
+                    } else {
+                        battlesArr.push(bt);
+                    }
+                });
+            }
+            let fileName = tourName + '-' + style + '.xls',
+                dataset = battlesArr.map(function(bt) {
+                    let juryScores = bt.juryScores.map(function (vote) {
+                        let juryscoresitem = [];
+                        let strP1 = vote.name + ' -> ' + bt.player1,
+                            strP2 = vote.name + ' -> ' + bt.player2;
+                        juryscoresitem[strP1] = vote.p1;
+                        juryscoresitem[strP2] = vote.p2;
+                        return juryscoresitem;
+                    });
+                    let totalP1 = bt.juryScores.reduce((acum, score2) => {
+                            return acum + score2.p1;
+                        }, 0),
+                        totalP2 = bt.juryScores.reduce((acum, score2) => {
+                            return acum + score2.p2;
+                        }, 0);
+                    let battleXls = {
+                        'Competidor 1': bt.player1,
+                        'Competidor 2': bt.player2,
+                        'Ganador': bt.winner,
+                        'Puntos competidor 1': totalP1,
+                        'Puntos competidor 2': totalP2,
+                        'Batalla #': bt.idForFixture
+                    };
+                    for (let k = 0; k < juryScores.length; k++){
+                        let juryScore = juryScores[k];
+                        for (let prop in juryScore) {
+                            if (juryScore.hasOwnProperty(prop)) {
+                                battleXls[prop] = juryScore[prop];
+                            }
+                        }
+                    }
+                    return battleXls;
+                });
+            xlsService.createXls(fileName,dataset);
+            cli(fileName);
         });
 
     };

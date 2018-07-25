@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
-import {baseImagesUri, baseApiUrl} from '../../config/frontendConfig'
+import {baseFilesUri, baseApiUrl} from '../../config/frontendConfig'
 import axios from 'axios';
 import PlayersService from '../services/PlayersService';
 import FixtureService from '../services/FixtureService';
@@ -57,12 +57,12 @@ class JuryScreen extends Component{
             imgPlayer1 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw",
             imgPlayer2 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJEQu7wCXuXxqEXkNkcxFQiApEaaWVi6UGlHRMT4-DExpNvIrJvw";
         try {
-            imgPlayer1 =  baseImagesUri + response.player1 + ".jpg";
+            imgPlayer1 =  baseFilesUri + response.player1 + ".jpg";
         } catch (err){
             console.log(err);
         }
         try {
-            imgPlayer2 = baseImagesUri + response.player2 + ".jpg";
+            imgPlayer2 = baseFilesUri + response.player2 + ".jpg";
         } catch (err){
             console.log(err);
         }
@@ -91,7 +91,9 @@ class JuryScreen extends Component{
 
     async sendPointsToServer(){
         let { battleId, points, juryName } = this.state;
+        alert("Puntos enviados!");
         await BattleService.sendCurBattleJuryPoints(battleId, juryName, points[0], points[1]);
+
     }
 
     sumarJugador(index){

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import FlexView from 'react-flexview';
-import {baseImagesUri} from '../../config/frontendConfig';
+import {baseFilesUri} from '../../config/frontendConfig';
 import BattleService from '../services/BattleService';
 import Background from '../../images/fondoDoup2.jpg';
 import AnimatedNumber from 'react-animated-number';
@@ -25,28 +25,53 @@ class BattlePublic extends Component{
     async componentDidMount() {
         let response = await BattleService.getCurrentBattle(this.props.match.params.style),
             self = this;
-        this.setState({
-            battleId: response._id,
-            imgPlayer1: baseImagesUri + response.player1 + ".jpg",
-            imgPlayer2: baseImagesUri + response.player2 + ".jpg",
-            p1Name: response.player1,
-            p2Name: response.player2,
-            juriesScores: response.juryScores
-        });
+        try {
+            this.setState({
+                battleId: response._id,
+                imgPlayer1: baseFilesUri + response.player1 + ".jpg",
+                imgPlayer2: baseFilesUri + response.player2 + ".jpg",
+                p1Name: response.player1,
+                p2Name: response.player2,
+                juriesScores: response.juryScores
+            });
+        } catch(err){
+            console.log(err);
+            this.setState = ({
+                battleId: -1,
+                p1Name: "",
+                p2Name: "",
+                imgPlayer1: "",
+                imgPlayer2: "",
+                juriesScores: []
+            });
+        }
+
         setInterval(async function(){
             await self.updatePointsFromserver();
         }, 5000);
     }
 
     async updatePointsFromserver() {
-        let battle = await BattleService.getCurBattlePoints(this.state.battleId);
-        this.setState({
+        try {
+            let battle = await BattleService.getCurBattlePoints(this.state.battleId);
+            this.setState({
                 juriesScores: battle.juryScores.map(function(score){return {
                     name: score.name,
                     p1: score.p1,
                     p2: score.p2
                 };})
-        });
+            });
+        } catch(err){
+            this.setState = ({
+                battleId: -1,
+                p1Name: "",
+                p2Name: "",
+                imgPlayer1: "",
+                imgPlayer2: "",
+                juriesScores: []
+            });
+        }
+
     }
 
     fixJuryCompetitorImgSrc(target) {
@@ -146,7 +171,7 @@ class BattlePublic extends Component{
                                 {jscore.name}
                             </div>
                             <div>
-                                <img style={{width: '150px', height: '150px', borderRadius: '10px'}} onError={this.fixJuryBrokenImgSrc}  src={baseImagesUri + jscore.name + ".jpg"} />
+                                <img style={{width: '150px', height: '150px', borderRadius: '10px'}} onError={this.fixJuryBrokenImgSrc}  src={baseFilesUri + jscore.name + ".jpg"} />
                             </div>
                             <div>
                                 {this.state.p1Name} : {jscore.p1}

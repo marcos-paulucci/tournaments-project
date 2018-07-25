@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import FixtureService from "../services/FixtureService";
 import BattleService from "../services/BattleService";
 import {getLevel, getLevelsRange} from "../services/fixtureUtilities";
-import {baseImagesUri} from "../../config/frontendConfig";
+import {baseFilesUri} from "../../config/frontendConfig";
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 class FixtureView extends Component {
 
@@ -133,7 +133,11 @@ class FixtureView extends Component {
         target.target.src = playerDefaultImg;
     }
 
-
+    async exportBattles() {
+        let fileName = await FixtureService.getExport(this.props.match.params.torneoName, this.props.match.params.style);
+        debugger;
+        window.open(baseFilesUri + fileName.data, '_blank');
+    }
 
 
     render() {
@@ -157,9 +161,9 @@ class FixtureView extends Component {
                                         <div style={{float: 'left', width: '60%' }}>
                                             <div>Battle # {battle.idForFixture}</div>
                                             <div>Competidor 1: {battle.p1}</div>
-                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + battle.p1 + ".jpg"} />
+                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p1 + ".jpg"} />
                                             <div>Competidor 2: {battle.p2}</div>
-                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseImagesUri + battle.p2 + ".jpg"} />
+                                            <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p2 + ".jpg"} />
                                             {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
                                         </div>
 
@@ -175,6 +179,8 @@ class FixtureView extends Component {
                         </div>;
                     })}
                 </div>
+                <div style={{width: '100%', textAlign: 'center' }}>
+                    <button style={{display: 'inline-block',  width: '25%', fontSize: '1.5em', border: '1px solid black', borderRadius: '10px' }} type="button" onClick={self.exportBattles.bind(self)}>Exportar batallas de este torneo</button></div>
             </div>
         )
     }

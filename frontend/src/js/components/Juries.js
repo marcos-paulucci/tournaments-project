@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactLoading from 'react-loading';
 import axios from "axios/index";
 import JuryService from "../services/JuryService";
-import {baseImagesUri} from "../../config/frontendConfig";
+import {baseFilesUri} from "../../config/frontendConfig";
 import { ToastContainer, toast } from 'react-toastify';
 import {baseApiUrl} from '../../config/frontendConfig';
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
@@ -224,7 +224,7 @@ render() {
                                 {this.state.existentJuries.map(function(jury, index){
                                     return <li className="juryLi" key={ jury.id }>
                                         <span className="juryName" >{jury.name}</span>
-                                        <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseImagesUri + jury.name + ".jpg"} />
+                                        <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseFilesUri + jury.name + ".jpg"} />
                                         <div>
                                             <a style={{display: 'inline-block'}} href="#" id={jury.id} onClick={self.juryIsjuryChanged.bind(self)}>Seleccionar para el torneo</a>
                                             <Checky style={{display: 'inline-block'}} checked={jury.isJury} />
@@ -253,7 +253,7 @@ render() {
                                 {this.state.juries.map(function(jury, index){
                                     return <li className="juryLi" key={ index }>
                                         <input className="juryName" disabled='disabled' id={"juryName" + index}  type="text" name="juryName" value={jury.name} onChange={self.juryNameChanged.bind(self)}/>
-                                        <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseImagesUri + jury.name + ".jpg"} />
+                                        <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixJuryBrokenImgSrc}  src={baseFilesUri + jury.name + ".jpg"} />
                                     </li>;
                                 })}
                             </div>
