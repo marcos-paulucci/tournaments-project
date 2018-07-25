@@ -62,54 +62,63 @@ class FixtureService {
                 }
                 fixtureToUpdate = fxt;
             });
+            debugger;
             await Player.find({
                 'style': fixtureToUpdate.style,
-                '_id': { $in: fixtureToUpdate.players}
+                '_id': { $in: fixtureToUpdate.players.map(function(p){return p.player;})}
             }, async function(err, pls){
                 for (let i = 0; i < pls.length; i++){
                     players.push(pls[i]);
                 }
+                debugger;
+                let finalPlayers = fixtureToUpdate.players.sort(function(p1,p2){return p1.index > p2.index;})
+                    .map(function(pid){
+                        debugger;
+                        return players.find(p => p.id === pid.player)
+                    });
+
+                debugger;
+                for (let i = 0, idForFixture = 1; i < fixtureToUpdate.top; i+= 2, idForFixture++){
+                    let playerOne = finalPlayers[i]? finalPlayers[i].name : "dummy",
+                        playerTwo = finalPlayers[i+1]? finalPlayers[i+1].name : "dummy";
+                    battlesArr.push({
+                        fixtureId: fixtureToUpdate._id,
+                        style: fixtureToUpdate.style,
+                        player1: playerOne,
+                        player2: playerTwo,
+                        isCurrent: false,
+                        idForFixture: idForFixture,
+                        nextBattleIdFix: nextBattleCalculator(idForFixture, fixtureToUpdate.top)
+                    });
+                }
+
+                //creacion de las batallas de cuartos, semis, etc, con competidores por ahora indefinidos
+                const totalBattles = fixtureToUpdate.top - 1,
+                    createdBattles = fixtureToUpdate.top / 2,
+                    remainingBattlesToCreate = totalBattles - createdBattles;
+                for (let j = createdBattles + 1; j < remainingBattlesToCreate + createdBattles + 1; j++){
+                    battlesArr.push({
+                        fixtureId: fixtureToUpdate._id,
+                        style: fixtureToUpdate.style,
+                        player1: "",
+                        player2: "",
+                        isCurrent: false,
+                        idForFixture: j,
+                        nextBattleIdFix: nextBattleCalculator(j, fixtureToUpdate.top)
+                    });
+                }
+                BattleService.createAllBattles(fixtureToUpdate._id, fixtureToUpdate.style, battlesArr, async function(btls){
+                    fixtureToUpdate.battles = btls;
+                    fixtureToUpdate.save(async function (err, updatedFx) {
+                        if (err) {
+                            console.log("Error updating fixture ", err);
+                        }
+                    });
+                    await BattleService.closeDummiesBattles(fixtureToUpdate._id);
+                    cli.callback();
+                });
             });
 
-            for (let i = 0, idForFixture = 1; i < fixtureToUpdate.top; i+= 2, idForFixture++){
-                let playerOne = players[i]? players[i].name : "dummy",
-                    playerTwo = players[i+1]? players[i+1].name : "dummy";
-                battlesArr.push({
-                    fixtureId: fixtureToUpdate._id,
-                    style: fixtureToUpdate.style,
-                    player1: playerOne,
-                    player2: playerTwo,
-                    isCurrent: false,
-                    idForFixture: idForFixture,
-                    nextBattleIdFix: nextBattleCalculator(idForFixture, fixtureToUpdate.top)
-                });
-            }
-
-            //creacion de las batallas de cuartos, semis, etc, con competidores por ahora indefinidos
-            const totalBattles = fixtureToUpdate.top - 1,
-                createdBattles = fixtureToUpdate.top / 2,
-                remainingBattlesToCreate = totalBattles - createdBattles;
-            for (let j = createdBattles + 1; j < remainingBattlesToCreate + createdBattles + 1; j++){
-                battlesArr.push({
-                    fixtureId: fixtureToUpdate._id,
-                    style: fixtureToUpdate.style,
-                    player1: "",
-                    player2: "",
-                    isCurrent: false,
-                    idForFixture: j,
-                    nextBattleIdFix: nextBattleCalculator(j, fixtureToUpdate.top)
-                });
-            }
-            BattleService.createAllBattles(fixtureToUpdate._id, fixtureToUpdate.style, battlesArr, async function(btls){
-                fixtureToUpdate.battles = btls;
-                fixtureToUpdate.save(async function (err, updatedFx) {
-                    if (err) {
-                        console.log("Error updating fixture ", err);
-                    }
-                });
-                await BattleService.closeDummiesBattles(fixtureToUpdate._id);
-                cli.callback();
-            });
         }, fixtureId);
 
 

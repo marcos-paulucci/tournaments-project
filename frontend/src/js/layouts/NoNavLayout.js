@@ -1,8 +1,7 @@
 import React from "react"
 
 const TournamentsLayout = props => (
-    <div>
-        <h3>Torneos Doup!</h3>
+    <div style={{height: '100%'}}>
         {props.children}
     </div>
 );

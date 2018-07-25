@@ -26,7 +26,7 @@ import {
 const Root = ({ store: store }) => {
     return(
             <HashRouter>
-                <div style={{backgroundColor: 'rgb(188, 216, 95)'}}>
+                <div style={{backgroundColor: 'rgb(188, 216, 95)', height: '100%'}}>
                     <Switch>
                         {/*<AppRoute exact path="/" layout={ FixtureLayout } component={ Tournaments } />*/}
                         {/*<AppRoute path="/signin" layout={ FixtureLayout } component={ Tournaments } />*/}

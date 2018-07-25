@@ -65,3 +65,29 @@ h1 {
 ul {
     list-style-type: none;
 }
+
+@font-face {
+    font-family: 'Poplar';
+    src: url('PoplarStd.otf')  format('truetype');
+}
+
+@font-face {
+    font-family: 'Wanted';
+    src: url('WantedM54.ttf')  format('truetype');
+}
+
+
+.juriesBorderTop {
+    position: relative;
+    z-index : 1;
+}
+
+.juriesBorderTop:before {
+    content : "";
+    position: absolute;
+    left    : 5%;
+    top  : 0;
+    height  : 1px;
+    width   : 90%;  /* or 100px */
+    border-top:10px solid rgb(188, 216, 95);
+}
