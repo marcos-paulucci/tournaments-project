@@ -90,6 +90,17 @@ class FixtureView extends Component {
     async closeBattle(e) {
         let battleId = e.target.id.split(".")[0];
         try {
+            let battle = await BattleService.getCurBattlePoints(battleId);
+            let totalP1 = battle.juryScores.reduce((acum, score2) => {
+                    return acum + score2.p1;
+                }, 0),
+                totalP2 = battle.juryScores.reduce((acum, score2) => {
+                    return acum + score2.p2;
+                }, 0);
+            if (totalP1 + totalP2 < battle.juryScores.length * this.state.puntosPorBatalla){
+                alert("No puedes cerrar esta batalla ya que no han votado todos!");
+                return;
+            }
             await BattleService.closeBattle(battleId, this.state.fixtureId);
             await this.fetchFixture();
         } catch (err){
