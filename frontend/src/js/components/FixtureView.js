@@ -3,6 +3,7 @@ import FixtureService from "../services/FixtureService";
 import BattleService from "../services/BattleService";
 import {getLevel, getLevelsRange} from "../services/fixtureUtilities";
 import {baseFilesUri} from "../../config/frontendConfig";
+import { Link } from 'react-router-dom';
 const playerDefaultImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrvl6Xc4xHqKSt9zIBl768acXKMdXSI8XNsD_8VDkAXDXy3sPNmg";
 class FixtureView extends Component {
 
@@ -136,7 +137,7 @@ class FixtureView extends Component {
     async exportBattles() {
         let fileName = await FixtureService.getExport(this.props.match.params.torneoName, this.props.match.params.style);
         debugger;
-        window.open(baseFilesUri + fileName.data, '_blank');
+        window.open("http://localhost:3005/uploads/" + fileName.data, '_blank');
     }
 
 
@@ -180,7 +181,9 @@ class FixtureView extends Component {
                     })}
                 </div>
                 <div style={{width: '100%', textAlign: 'center' }}>
-                    <button style={{display: 'inline-block',  width: '25%', fontSize: '1.5em', border: '1px solid black', borderRadius: '10px' }} type="button" onClick={self.exportBattles.bind(self)}>Exportar batallas de este torneo</button></div>
+                    <button style={{display: 'inline-block',  width: '25%', fontSize: '1.5em', border: '1px solid black', borderRadius: '10px' }} type="button" onClick={self.exportBattles.bind(self)}>Exportar batallas de este torneo</button>
+                </div>
+
             </div>
         )
     }

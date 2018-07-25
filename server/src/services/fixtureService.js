@@ -172,12 +172,12 @@ class FixtureService {
                             return acum + score2.p2;
                         }, 0);
                     let battleXls = {
+                        'Batalla #': bt.idForFixture,
                         'Competidor 1': bt.player1,
                         'Competidor 2': bt.player2,
                         'Ganador': bt.winner,
                         'Puntos competidor 1': totalP1,
-                        'Puntos competidor 2': totalP2,
-                        'Batalla #': bt.idForFixture
+                        'Puntos competidor 2': totalP2
                     };
                     for (let k = 0; k < juryScores.length; k++){
                         let juryScore = juryScores[k];
