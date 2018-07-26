@@ -14,6 +14,18 @@ lokiDb.loadDatabase({}, function() {
 
 class BattleService {
 
+    async getBattleById(callback, battleId){
+        await Battle.findById(battleId, async function (err, bt) {
+            if (err) {
+                console.log('Battle search Error: ' + err);
+            } else if (bt) {
+                callback(bt);
+            } else {
+                console.log('Battle search Error: 400: not found');
+            }
+        });
+    }
+
     async setCurrentBattle(callback, battleId, style, fixtureId){
         const self = this;
         await Battle.update({style: style},{isCurrent: false},{multi: true});
@@ -106,6 +118,21 @@ class BattleService {
                         callback();
                     }
                 });
+            } else {
+                callback();
+            }
+        });
+    };
+
+    async updateBattle(callback, battleId, votes, winner) {
+        const self = this;
+        Battle.findById(battleId, async function (err, battle) {
+            if (err) {
+                console.log('Updating battle error, battle not found. Error: ' + err);
+            } else if (battle) {
+                battle.juryScores = votes;
+                battle.winner = winner;
+                await battle.save(function () { });
             } else {
                 callback();
             }

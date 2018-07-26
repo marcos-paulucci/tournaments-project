@@ -151,6 +151,12 @@ class FixtureView extends Component {
         window.open("http://localhost:3005/uploads/" + fileName.data, '_blank');
     }
 
+    navEditBattle(e){
+        const lastIndex = window.location.href.lastIndexOf("/"),
+            newUri = window.location.href.substring(0, lastIndex) + "/editBattle/" + e.target.id;
+        window.open(newUri, '_blank');
+    }
+
 
     render() {
 
@@ -168,7 +174,7 @@ class FixtureView extends Component {
                             <div style={{fontSize: '2em' }}>{lvl.levelName}</div>
                             <ul>
                             {lvl.battles.map(function(battle, index){
-                                return <li className="battleLi" style={{width: '100%', height: '10em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
+                                return <li className="battleLi" style={{width: '100%', height: '11.5em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
                                     <div style={{width: '80%', margin: 'auto' }}>
                                         <div style={{float: 'left', width: '60%' }}>
                                             <div>Battle # {battle.idForFixture}</div>
@@ -176,7 +182,7 @@ class FixtureView extends Component {
                                             <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p1 + ".jpg"} />
                                             <div>Competidor 2: {battle.p2}</div>
                                             <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p2 + ".jpg"} />
-                                            {battle.winner !== "" ? <div> Ganador: {battle.winner} </div> : ""}
+                                            {battle.winner !== "" ? <div> Ganador: {battle.winner} <button type="button" style={{fontSize: '1.2em'}} id={battle.battleId} onClick={self.navEditBattle.bind(self)} >Editar batalla</button></div> : ""}
                                         </div>
 
                                         <div className="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>

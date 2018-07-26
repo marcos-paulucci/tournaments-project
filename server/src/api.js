@@ -64,6 +64,20 @@ router.route('/currentBattle')
     }, req.query.style);
 });
 
+router.route('/battle')
+.get(async (req, res) => {
+    await battleService.getBattleById(function(bt){
+        res.status(200).json(bt);
+    }, req.query.id);
+})
+.put(async (req, res) => {
+    debugger;
+    await battleService.updateBattle(function(bt){
+        res.status(200).json(bt);
+    }, req.body.id, req.body.votes, req.body.winner);
+});
+
+
 router.route('/closeBattle')
     .post(async (req, res) => {
         await battleService.closeBattle(function(){

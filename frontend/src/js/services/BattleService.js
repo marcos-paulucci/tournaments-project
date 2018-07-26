@@ -27,6 +27,32 @@ class BattleService {
         return response.data;
     };
 
+    async getBattleById(id) {
+        let response = "";
+        try {
+            response = await axios.get(baseApiUrl +  'battle', {
+                params: {
+                    id: id
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+        return response.data;
+    };
+
+    async updateBattle(id, votes, winner) {
+        let response = "";
+        try {
+            response = await axios.put(baseApiUrl +  'battle', {id, votes, winner});
+
+        } catch (error) {
+            console.error(error);
+        }
+        return response.data;
+    };
+
     async sendCurBattleJuryPoints(battleId, juryName, p1, p2) {
         try {
             await axios.post(baseApiUrl +  'currentBattlePoints', {battleId, juryName, p1, p2  });

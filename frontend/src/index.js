@@ -14,6 +14,7 @@ import JuryScreen from './js/components/JuryScreen'
 import FixtureView from './js/components/FixtureView'
 import Juries from './js/components/Juries'
 import Players from './js/components/Players'
+import EditBattle from './js/components/EditBattle'
 import TournamentsLayout from "./js/layouts/TournamentsLayout";
 import TourFixturesLayout from "./js/layouts/TourFixturesLayout";
 import {
@@ -39,6 +40,7 @@ const Root = ({ store: store }) => {
                         <AppRoute  path="/torneos/:torneoName/:style/battle" layout={ NoNavLayout } component={ BattlePublic } />
                         <AppRoute  path="/torneos/:torneoName/:style/vote" layout={ NoNavLayout } component={ JuryScreen } />
                         <AppRoute  path="/torneos/:torneoName/:style/vote/:juryName" layout={ NoNavLayout } component={ JuryScreen } />
+                        <AppRoute  path="/torneos/:torneoName/:style/editBattle/:battleId" layout={ NoNavLayout } component={ EditBattle } />
 
                     </Switch>
                 </div>
