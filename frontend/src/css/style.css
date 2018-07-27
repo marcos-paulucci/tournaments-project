@@ -89,5 +89,5 @@ ul {
     top  : 0;
     height  : 1px;
     width   : 90%;  /* or 100px */
-    border-top:10px solid rgb(188, 216, 95);
+    border-top:10px solid black;
 }

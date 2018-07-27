@@ -12,6 +12,30 @@ class BattleService {
         }
     };
 
+
+    async viewClosedBattle(battleId, style, fixtureId) {
+        try {
+            await axios.post(baseApiUrl +  'viewBattle', {battleId: battleId, style: style, fixtureId: fixtureId});
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    async getViewBattle(style) {
+        let response = "";
+        try {
+            response = await axios.get(baseApiUrl +  'viewBattle', {
+                params: {
+                    style
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+        return response.data;
+    };
+
     async getCurrentBattle(style) {
         let response = "";
         try {

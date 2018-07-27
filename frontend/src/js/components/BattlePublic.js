@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import FlexView from 'react-flexview';
 import {baseFilesUri} from '../../config/frontendConfig';
 import BattleService from '../services/BattleService';
-import Background from '../../images/fondoBatallaNuevo.jpg';
+import Background from '../../images/FondoCordoba.jpg';
 import AnimatedNumber from 'react-animated-number';
 import FixtureService from "../services/FixtureService";
 const juryDefaultImg = "https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/1515995/1160/772/m1/fpnw/wm0/jury-icon-01-.jpg?1470143664&s=d57a204b6b3f50b9eaa79deb077610ca";
@@ -23,8 +23,32 @@ class BattlePublic extends Component{
     }
 
     async componentDidMount() {
-        let response = await BattleService.getCurrentBattle(this.props.match.params.style),
+        function isEmptyObject(obj) {
+            for(let prop in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        let responseViewBattle = await BattleService.getViewBattle(this.props.match.params.style),
+            response = await BattleService.getCurrentBattle(this.props.match.params.style),
             self = this;
+        if (!isEmptyObject(responseViewBattle)){
+            this.setState({
+                battleId: responseViewBattle._id,
+                imgPlayer1: baseFilesUri + responseViewBattle.player1 + ".jpg",
+                imgPlayer2: baseFilesUri + responseViewBattle.player2 + ".jpg",
+                p1Name: responseViewBattle.player1,
+                p2Name: responseViewBattle.player2,
+                juriesScores: responseViewBattle.juryScores
+            });
+            return;
+        }
+        setInterval(async function(){
+            await self.updatePointsFromserver();
+        }, 4000);
         try {
             this.setState({
                 battleId: response._id,
@@ -46,9 +70,7 @@ class BattlePublic extends Component{
             });
         }
 
-        setInterval(async function(){
-            await self.updatePointsFromserver();
-        }, 3000);
+
     }
 
     async updatePointsFromserver() {
@@ -84,10 +106,10 @@ class BattlePublic extends Component{
 
     render() {
         let totalP1 = this.state.juriesScores.reduce((acum, score2) => {
-            return acum + score2.p1;
+            return acum + parseInt(score2.p1, 10);
         }, 0),
         totalP2 = this.state.juriesScores.reduce((acum, score2) => {
-            return acum + score2.p2;
+            return acum + parseInt(score2.p2, 10);
         }, 0),
             juryItemWidth = (95 / this.state.juriesScores.length).toString() + "%";
         let c1 = 'white', c2 = 'white';
@@ -183,7 +205,7 @@ class BattlePublic extends Component{
 
                 <FlexView className="juriesBorderTop" width="99%" style={{borderRadius: '5px', paddingTop: '1em'}}>
                     {this.state.juriesScores.map(jscore =>
-                        <FlexView grow={1} hAlignContent='center' style={{width: juryItemWidth, fontSize: '1.72em', display: 'inline-block', textAlign: 'center'}} key={jscore.name}>
+                        <FlexView grow={1} hAlignContent='center' style={{width: juryItemWidth, fontSize: '1.55em', display: 'inline-block', textAlign: 'center'}} key={jscore.name}>
                             <div style={{display: 'block'}}>
                                 <div style={{display: 'inline-block', verticalAlign: 'middle'}}>
                                     <img style={{width: '100px', height: '100px', borderRadius: '10px'}} onError={this.fixJuryBrokenImgSrc}  src={baseFilesUri + jscore.name + ".jpg"} />
