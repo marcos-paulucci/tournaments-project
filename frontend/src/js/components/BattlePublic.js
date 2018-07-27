@@ -167,7 +167,7 @@ class BattlePublic extends Component{
                         </FlexView>
                     </FlexView>
                     <FlexView style={{position: 'absolute', left: '40%', top: '0', width: '20%', height: '20%', display: 'inline-block', marginRight: '0.5em'}} hAlignContent='center' style={{display: 'inline-block',  textAlign: 'center'}}>
-                        <img style={{width: '150px', height: '150px'}}  src={require("../../images/LogoLigaDOUP.png")} />
+                        <img style={{width: '150px', height: '150px'}}  src={require("../../images/LogoBattleCordoba.png")} />
                     </FlexView>
                     <FlexView
                         grow={1}
