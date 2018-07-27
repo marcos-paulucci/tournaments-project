@@ -45,6 +45,41 @@ class BattleService {
         });
     }
 
+    async setViewBattle(callback, battleId, style, fixtureId){
+        const self = this;
+        await Battle.update({style: style},{viewOnScreen: false},{multi: true});
+
+        await Battle.findById(battleId, async function (err, bt) {
+            if (err) {
+                console.log('Battle search Error: ' + err);
+            } else if (bt) {
+                bt.viewOnScreen = true;
+                await bt.save(function (savedBt) { });
+                callback();
+            } else {
+                console.log('Battle search Error: 400: not found');
+            }
+        });
+    }
+
+    async unsetViewBattle(callback, style){
+        await Battle.update({style: style},{viewOnScreen: false},{multi: true});
+        callback();
+    }
+
+    async getViewBattle(callback, style){
+        Battle.findOne({viewOnScreen: true, style: style}, function(err, battle) {
+            if (err) {
+                console.log('Get viewOnScreen battle error : ' + err);
+            } else if (battle) {
+                callback(battle);
+            } else {
+                console.log('viewOnScreen Battle not found ');
+                callback({});
+            }
+        });
+    }
+
     async getCurrentBattle(callback, style){
         Battle.findOne({isCurrent: true, style: style}, function(err, battle) {
             if (err) {

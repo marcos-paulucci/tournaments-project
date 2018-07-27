@@ -47,7 +47,7 @@ class FixtureView extends Component {
             return;
         }
 
-        let battles = fixtureResponse.battles.map(function(b){ return {idForFixture: b.idForFixture ,winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2};});
+        let battles = fixtureResponse.battles.map(function(b){ return {idForFixture: b.idForFixture ,winner: b.winner, isCurrent: b.isCurrent, battleId: b._id ,p1: b.player1, p2: b.player2, viewOnScreen: b.viewOnScreen};});
         this.setState({
             battles: battles
         });
@@ -157,6 +157,19 @@ class FixtureView extends Component {
         window.open(newUri, '_blank');
     }
 
+    async viewBattlePublic(e){
+        const self = this;
+        let battleId = e.target.id.split("-")[0],
+            isPublic = e.target.id.split("-")[1] == "true";
+        if (isPublic){
+            battleId = -1;
+        }
+        BattleService.viewClosedBattle(battleId, this.props.match.params.style, this.state.fixtureId);
+        setTimeout(async function(){
+            await self.fetchFixture();
+        },1000);
+    }
+
 
     render() {
 
@@ -174,7 +187,7 @@ class FixtureView extends Component {
                             <div style={{fontSize: '2em' }}>{lvl.levelName}</div>
                             <ul>
                             {lvl.battles.map(function(battle, index){
-                                return <li className="battleLi" style={{width: '100%', height: '11.5em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
+                                return <li className="battleLi" style={{width: '100%', height: '13.5em', textAlign: 'left', borderBottom: '1px solid black' }} key={ index }>
                                     <div style={{width: '80%', margin: 'auto' }}>
                                         <div style={{float: 'left', width: '60%' }}>
                                             <div>Battle # {battle.idForFixture}</div>
@@ -182,7 +195,18 @@ class FixtureView extends Component {
                                             <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p1 + ".jpg"} />
                                             <div>Competidor 2: {battle.p2}</div>
                                             <img style={{width: '40px', height: '40px', borderRadius: '10px'}} onError={self.fixPlayerBrokenImgSrc}  src={baseFilesUri + battle.p2 + ".jpg"} />
-                                            {battle.winner !== "" ? <div> Ganador: {battle.winner} <button type="button" style={{fontSize: '1.2em'}} id={battle.battleId} onClick={self.navEditBattle.bind(self)} >Editar batalla</button></div> : ""}
+                                            {battle.winner !== "" ?
+                                                <div>
+                                                    <div>
+                                                        Ganador: {battle.winner}
+                                                        <button type="button" style={{fontSize: '1.2em'}} id={battle.battleId} onClick={self.navEditBattle.bind(self)} >
+                                                            Editar batalla
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button" style={{fontSize: '1.2em'}} id={battle.battleId + "-" + battle.viewOnScreen.toString()} onClick={self.viewBattlePublic.bind(self)} >{battle.viewOnScreen ? "Dejar de ver publicamente" : "Visualizar batalla publicamente"} </button>
+                                                    </div>
+                                                </div> : ""}
                                         </div>
 
                                         <div className="battleFixtureButtonCont" style={{float: 'right', width: '30%' }}>

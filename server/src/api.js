@@ -64,6 +64,24 @@ router.route('/currentBattle')
     }, req.query.style);
 });
 
+router.route('/viewBattle')
+    .post(async (req, res) => {
+        if (req.body.battleId === -1){
+            await battleService.unsetViewBattle(function(){
+                res.status(200).send('view battle public unset succesfully!');
+            }, req.body.style);
+        } else {
+            await battleService.setViewBattle(function(){
+                res.status(200).send('view battle public set succesfully!');
+            }, req.body.battleId, req.body.style, req.body.fixtureId);
+        }
+    })
+    .get(async (req, res) => {
+    await battleService.getViewBattle(function(bt){
+        res.status(200).json(bt);
+    }, req.query.style);
+});
+
 router.route('/battle')
 .get(async (req, res) => {
     await battleService.getBattleById(function(bt){

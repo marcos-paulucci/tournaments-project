@@ -10,7 +10,8 @@ var battleSchema = new Schema({
     winner:  { type: String, default: '' },
     isCurrent: { type: Boolean, default: false },
     idForFixture: {type: Number, default: 0},
-    nextBattleIdFix: {type: Number, default: 0}
+    nextBattleIdFix: {type: Number, default: 0},
+    viewOnScreen: { type: Boolean, default: false },
 });
 
 
