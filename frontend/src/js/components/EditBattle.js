@@ -17,7 +17,6 @@ class EditBattle extends Component{
     async componentDidMount() {
         try {
             let response = await BattleService.getBattleById(this.props.match.params.battleId);
-            debugger;
             this.setState({
                 battleId: this.props.match.params.battleId,
                 p1Name: response.player1,

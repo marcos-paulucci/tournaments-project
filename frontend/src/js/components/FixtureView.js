@@ -147,7 +147,6 @@ class FixtureView extends Component {
 
     async exportBattles() {
         let fileName = await FixtureService.getExport(this.props.match.params.torneoName, this.props.match.params.style);
-        debugger;
         window.open("http://localhost:3005/uploads/" + fileName.data, '_blank');
     }
 

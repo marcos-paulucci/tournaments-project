@@ -62,7 +62,6 @@ class FixtureService {
                 }
                 fixtureToUpdate = fxt;
             });
-            debugger;
             await Player.find({
                 'style': fixtureToUpdate.style,
                 '_id': { $in: fixtureToUpdate.players.map(function(p){return p.player;})}
@@ -70,14 +69,11 @@ class FixtureService {
                 for (let i = 0; i < pls.length; i++){
                     players.push(pls[i]);
                 }
-                debugger;
-                let finalPlayers = fixtureToUpdate.players.sort(function(p1,p2){return p1.index > p2.index;})
+                let finalPlayers = fixtureToUpdate.players.sort(function(p1,p2){return p1.index - p2.index;})
                     .map(function(pid){
-                        debugger;
                         return players.find(p => p.id === pid.player)
                     });
 
-                debugger;
                 for (let i = 0, idForFixture = 1; i < fixtureToUpdate.top; i+= 2, idForFixture++){
                     let playerOne = finalPlayers[i]? finalPlayers[i].name : "dummy",
                         playerTwo = finalPlayers[i+1]? finalPlayers[i+1].name : "dummy";

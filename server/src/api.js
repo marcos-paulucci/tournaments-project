@@ -89,7 +89,6 @@ router.route('/battle')
     }, req.query.id);
 })
 .put(async (req, res) => {
-    debugger;
     await battleService.updateBattle(function(bt){
         res.status(200).json(bt);
     }, req.body.id, req.body.votes, req.body.winner);

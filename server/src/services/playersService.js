@@ -83,16 +83,15 @@ class PlayersService {
         let fixture;
         await TournamentsService.getTourFixture(tournamentName, style, async function(fx){
             fixture = fx;
-            debugger;
             await Player.find({
                 '_id': { $in: fixture.players.map(function(p){return p.player})}
             }, function(err, pls){
-                debugger;
-                let finalPlayers = fixture.players.sort(function(p1,p2){return p1.index > p2.index;})
+                let finalPlayers = fixture.players.sort(function(p1,p2){
+                    return p1.index - p2.index;
+                })
                     .map(function(p){return p.player}).map(function(pid){
                     return pls.find(p => p.id === pid)
                 });
-                debugger;
                 callback(finalPlayers);
             });
         });
@@ -104,7 +103,6 @@ class PlayersService {
         let fx;
         await TournamentsService.getTourFixture(tournName, style, function(fxt){
             fx = fxt;
-            debugger;
             fx.players = playersIds.map(function(p, i){return {player: p, index: i};});
             fx.save(function (err, updatedFx) {
                 if (err) {
@@ -116,22 +114,6 @@ class PlayersService {
 
     };
 
-    // async getPlayers(callback, torneoName, style){
-    //     let fxt;
-    //     await TournamentsService.getTourFixture(torneoName, style, async function(fx){
-    //         fxt = fx;
-    //         await Player.find({style: style}, function(err, pls) {
-    //             var players = [];
-    //             pls.forEach(function(p) {
-    //                 p.plays = fxt.players.map(function(p){return p.player}).indexOf(p._id) >= 0;
-    //                 players.push({name: p.name, _id: p._id, plays: p.plays});
-    //             });
-    //             callback(players.sort(function(p1, p2){return p1.index > p2.index}));
-    //         });
-    //     });
-    //
-    //
-    // };
 
 }
 
